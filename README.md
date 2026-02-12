@@ -67,13 +67,18 @@ Delegate tasks to specialized subagents with isolated context windows. From pi's
 **Tool:** `subagent` (single, parallel, or chained execution)
 **Prompts:** `/implement`, `/scout-and-plan`, `/implement-and-review`
 
-Agents are defined as markdown files in `~/.pi/agent/agents/`:
+Agents are defined as markdown files in `~/.pi/agent/agents/` (copy from `agents/` in this repo):
+
+```bash
+cp ~/.my-pi/agents/*.md ~/.pi/agent/agents/
+```
+
 | Agent | Purpose | Model |
 |-------|---------|-------|
-| `scout` | Fast codebase recon | Haiku |
-| `planner` | Implementation plans | Sonnet |
-| `reviewer` | Code review | Sonnet |
-| `worker` | General-purpose | Sonnet |
+| `scout` | Fast codebase recon | Haiku 4.5 |
+| `planner` | Implementation plans | Opus 4.6 |
+| `reviewer` | Code review | Opus 4.6 |
+| `worker` | General-purpose | Opus 4.6 |
 
 Features:
 - Each subagent runs in an isolated `pi` process (no context pollution)
