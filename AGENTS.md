@@ -56,10 +56,6 @@ content.js https://example.com       # Extract page content
 
 Full browser automation via Chrome DevTools Protocol. Use for interacting with web pages, testing UIs, or scraping dynamic content. Read the skill for setup and usage.
 
-## Prompt Templates
-
-- `/bootstrap` — Set up a fresh pi instance with all custom extensions, skills, agents, and settings from `~/.my-pi`
-
 ## Workflow Preferences
 
 - Use **superpowers skills** when available (brainstorming, writing-plans, subagent-driven-development, test-driven-development, etc.)

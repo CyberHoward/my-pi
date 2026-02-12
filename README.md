@@ -16,13 +16,15 @@ prompts/       # Prompt templates (copy to ~/.pi/agent/prompts/)
 
 ### Quick Bootstrap
 
-On a fresh pi, clone this repo and run `/bootstrap`:
-
 ```bash
 git clone https://github.com/noahsaso/my-pi ~/.my-pi
+cp ~/.my-pi/AGENTS.md ~/.pi/agent/AGENTS.md
+cp ~/.my-pi/settings.example.json ~/.pi/agent/settings.json
 pi
 # then type: /bootstrap
 ```
+
+The first two copies are needed so pi can find the extensions and prompt templates. `/bootstrap` handles the rest (agents, pi-skills, superpowers, env vars).
 
 ### Manual Setup
 
