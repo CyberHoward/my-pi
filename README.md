@@ -11,12 +11,22 @@ skills/        # Pi skills (auto-loaded via settings)
 
 ## Setup
 
-Add to `~/.pi/agent/settings.json`:
+Copy the example settings to your pi config:
+
+```bash
+cp ~/.my-pi/settings.example.json ~/.pi/agent/settings.json
+```
+
+Or merge into your existing `~/.pi/agent/settings.json`. The key entries are:
 
 ```json
 {
   "extensions": ["~/.my-pi/extensions"],
-  "skills": ["~/.my-pi/skills"]
+  "skills": [
+    "~/.my-pi/skills",
+    "~/.claude/skills",
+    "~/.claude/plugins/cache/claude-plugins-official/superpowers/4.2.0/skills"
+  ]
 }
 ```
 
