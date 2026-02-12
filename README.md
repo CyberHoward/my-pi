@@ -6,10 +6,10 @@ Custom [pi](https://github.com/badlogic/pi-mono) extensions, skills, and agents.
 
 ```
 AGENTS.md      # Global workflow preferences (copy to ~/.pi/agent/AGENTS.md)
+SETUP.md       # Step-by-step setup instructions for pi to follow
 extensions/    # Pi extensions (auto-loaded via settings)
 skills/        # Pi skills (auto-loaded via settings)
 agents/        # Subagent definitions (copy to ~/.pi/agent/agents/)
-prompts/       # Prompt templates (copy to ~/.pi/agent/prompts/)
 ```
 
 ## Setup
@@ -18,23 +18,12 @@ prompts/       # Prompt templates (copy to ~/.pi/agent/prompts/)
 
 ```bash
 git clone https://github.com/noahsaso/my-pi ~/.my-pi
-cp ~/.my-pi/AGENTS.md ~/.pi/agent/AGENTS.md
-cp ~/.my-pi/settings.example.json ~/.pi/agent/settings.json
-pi
-# then type: /bootstrap
+cd ~/.my-pi && pi "follow SETUP.md to setup"
 ```
-
-The first two copies are needed so pi can find the extensions and prompt templates. `/bootstrap` handles the rest (agents, pi-skills, superpowers, env vars).
 
 ### Manual Setup
 
-#### 1. Global Prompt
-
-```bash
-cp ~/.my-pi/AGENTS.md ~/.pi/agent/AGENTS.md
-```
-
-#### 2. Settings
+#### 1. Settings
 
 Copy the example settings to your pi config:
 

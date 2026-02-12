@@ -5,9 +5,7 @@
   "extensions": [
     "~/.my-pi/extensions"
   ],
-  "prompts": [
-    "~/.my-pi/prompts"
-  ],
+
   "skills": [
     "~/.my-pi/skills",
     "~/.claude/skills"
