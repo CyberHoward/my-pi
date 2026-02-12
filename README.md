@@ -130,6 +130,77 @@ Features:
 - Streaming output with live progress
 - Works with superpowers' subagent-driven-development skill
 
+### clipboard.ts
+
+Read/write the system clipboard. Cross-platform: macOS (`pbcopy`/`pbpaste`), Linux (`xclip`, `xsel`, or `wl-copy`/`wl-paste`). Skips registration silently on unsupported platforms.
+
+**Tools:** `clipboard_read`, `clipboard_write`
+
+Large clipboard contents are automatically truncated.
+
+### notifications/
+
+System notifications with a custom chime sound. Plays a ping when the agent needs your attention. Cross-platform: macOS (`osascript` + `afplay`), Linux (`notify-send` + `paplay`/`aplay`/`ffplay`). Skips registration silently on unsupported platforms.
+
+**Tools:** `notify`, `ask_user`
+**Command:** `/ping`
+
+Features:
+- `notify` — Send a system notification with optional chime sound
+- `ask_user` — Play chime + show notification + prompt for input (use when you need the user's attention)
+- `/ping` — Test the chime sound
+- Custom sound at `notifications/chime.mp3` (swap with any .mp3)
+
+### file-watcher.ts
+
+Watch files and directories for changes using Node's `fs.watch` API.
+
+**Tools:** `watch_start`, `watch_stop`, `watch_list`, `watch_events`
+
+Features:
+- Watch files or directories (recursive supported)
+- Optional glob pattern filtering (e.g. `*.ts`)
+- Changes are debounced and batched (2s window)
+- Batched change summaries sent to agent via `sendMessage`
+- Watchers are ephemeral (cleaned up on session shutdown)
+
+### code-ast/
+
+TypeScript-aware code intelligence: find references, rename symbols, list declarations.
+
+**Tools:** `ast_references`, `ast_rename`, `ast_symbols`
+
+Features:
+- **TS/JS files:** Uses the TypeScript compiler API with full type-system awareness (finds references through imports, renames across the project, understands tsconfig)
+- **Other languages:** Falls back to `rg` (ripgrep) for references and rename
+- `ast_symbols` lists functions, classes, interfaces, types, enums with export status
+- Requires `typescript` npm package (installed in `code-ast/node_modules/`)
+
+### antigravity-image-gen.ts
+
+Image generation via Google Antigravity (gemini-3-pro-image, imagen-3).
+
+**Tool:** `generate_image`
+
+Features:
+- Generates images from text prompts
+- Configurable aspect ratio, model, and save location
+- Requires Google OAuth: run `/login` for google-antigravity
+
+### memory.ts
+
+Persistent memory across sessions. Learns from corrections and saves lessons for future use.
+
+**Tools:** `memory_save`, `memory_search`, `memory_list`, `memory_remove`
+
+Features:
+- **Project memories** stored in `<project>/.pi/memory/memories.json`
+- **Global memories** stored in `~/.pi/agent/memory/memories.json`
+- Auto-injected into system prompt at the start of each agent turn
+- Fuzzy text search across all memories
+- Track correction source (e.g. `source: "correction"`) for learning from mistakes
+- Most recent 50 memories injected (keeps context manageable)
+
 ## Skills (via pi-skills)
 
 Installed from [badlogic/pi-skills](https://github.com/badlogic/pi-skills) into `~/.pi/agent/skills/pi-skills/`.

@@ -73,6 +73,14 @@ Add the skills path to `~/.pi/agent/settings.json`:
 }
 ```
 
-## 6. Verify
+## 6. Extension Dependencies
+
+Install npm dependencies for the code-ast extension:
+
+```bash
+cd ~/.my-pi/extensions/code-ast && npm install
+```
+
+## 7. Verify
 
 Run `pi -p "list all available tools"` to confirm everything loaded.

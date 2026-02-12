@@ -56,6 +56,58 @@ content.js https://example.com       # Extract page content
 
 Full browser automation via Chrome DevTools Protocol. Use for interacting with web pages, testing UIs, or scraping dynamic content. Read the skill for setup and usage.
 
+### Clipboard (`clipboard_read`, `clipboard_write`)
+
+Read and write the system clipboard. Cross-platform (macOS + Linux). Not registered on unsupported platforms.
+
+- `clipboard_read` — Read current clipboard contents
+- `clipboard_write` — Write text to clipboard
+
+### Notifications (`notify`, `ask_user`)
+
+System notifications with a custom chime sound. Cross-platform (macOS + Linux).
+
+- `notify` — Send a system notification with optional chime sound
+- `ask_user` — Play chime + notification + prompt user for input. **Use this when you need the user's attention.**
+- `/ping` — Test the chime sound
+
+### File Watcher (`watch_start`, `watch_stop`, `watch_list`, `watch_events`)
+
+Watch files and directories for changes. Changes are debounced and batched.
+
+- `watch_start` — Start watching a path (supports recursive, glob patterns)
+- `watch_stop` — Stop a watcher by ID
+- `watch_list` — List active watchers
+- `watch_events` — Get accumulated change events from a watcher
+
+### Code AST (`ast_references`, `ast_rename`, `ast_symbols`)
+
+TypeScript-aware code intelligence. Falls back to ripgrep for non-TS/JS files.
+
+- `ast_references` — Find all references to a symbol
+- `ast_rename` — Rename a symbol across the codebase (applies edits)
+- `ast_symbols` — List all symbols in a file (functions, classes, types, etc.)
+
+### Image Generation (`generate_image`)
+
+Generate images via Google Antigravity (gemini-3-pro-image). Requires `/login` for google-antigravity.
+
+### Persistent Memory (`memory_save`, `memory_search`, `memory_list`, `memory_remove`)
+
+Persistent memory across sessions. Memories are auto-injected into the system prompt.
+
+- `memory_save` — Save a memory (project-scoped or global). Use `source: "correction"` when learning from mistakes.
+- `memory_search` — Fuzzy search across memories
+- `memory_list` — List all memories
+- `memory_remove` — Remove a memory by ID
+
+**When the user corrects you, proactively save the lesson using `memory_save` with `source: "correction"`.**
+
+Use memory for:
+- Saving lessons learned from corrections/mistakes
+- Remembering project conventions and preferences
+- Storing decisions made during sessions
+
 ## Workflow Preferences
 
 - Use **superpowers skills** when available (brainstorming, writing-plans, subagent-driven-development, test-driven-development, etc.)
