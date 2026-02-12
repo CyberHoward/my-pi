@@ -18,7 +18,7 @@ agents/        # Subagent definitions (copy to ~/.pi/agent/agents/)
 
 ```bash
 git clone https://github.com/noahsaso/my-pi ~/.my-pi
-cd ~/.my-pi && pi "follow SETUP.md to setup"
+cd ~/.my-pi && pi "Read SETUP.md and walk me through setting up pi with my custom extensions, skills, and agents. Do each step, ask me for input when needed (API keys, versions), and verify everything works at the end."
 ```
 
 ### Manual Setup
