@@ -34,6 +34,23 @@ cd ~/.pi/agent/skills/pi-skills/browser-tools && npm install
 rm -rf ~/.pi/agent/skills/pi-skills/{gccli,gdcli,gmcli,transcribe,vscode,youtube-transcript}
 ```
 
+### Browser (for browser-tools)
+
+**macOS:** Chrome is usually already installed. If not: `brew install --cask google-chrome`
+
+**Linux:**
+```bash
+# Option 1: Chrome (recommended — works without snap)
+wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+sudo dpkg -i /tmp/chrome.deb
+sudo apt-get install -f -y
+
+# Option 2: Chromium (if snap is available)
+sudo snap install chromium
+```
+
+The `browser-start.js` script auto-detects Chrome or Chromium on both macOS and Linux. On headless Linux (no DISPLAY), it runs in headless mode automatically.
+
 ## 4. Environment Variables
 
 Check if `BRAVE_API_KEY` is set:
