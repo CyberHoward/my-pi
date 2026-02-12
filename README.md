@@ -21,7 +21,7 @@ Or merge into your existing `~/.pi/agent/settings.json`.
 
 ### Superpowers Skills
 
-We use [superpowers](https://github.com/claude-plugins-official/superpowers) skills heavily. To set them up:
+We use [superpowers](https://github.com/obra/superpowers) skills heavily. To set them up:
 
 1. Install superpowers in Claude Code (it caches to `~/.claude/plugins/cache/`)
 2. Find your installed version:
