@@ -5,23 +5,34 @@ Custom [pi](https://github.com/badlogic/pi-mono) extensions, skills, and agents.
 ## Structure
 
 ```
-AGENTS.md      # Global system prompt (copy to ~/.pi/agent/AGENTS.md)
+AGENTS.md      # Global workflow preferences (copy to ~/.pi/agent/AGENTS.md)
 extensions/    # Pi extensions (auto-loaded via settings)
 skills/        # Pi skills (auto-loaded via settings)
 agents/        # Subagent definitions (copy to ~/.pi/agent/agents/)
+prompts/       # Prompt templates (copy to ~/.pi/agent/prompts/)
 ```
 
 ## Setup
 
-### 1. Global Prompt
+### Quick Bootstrap
 
-Copy the global system prompt that teaches pi about all custom tools:
+On a fresh pi, clone this repo and run `/bootstrap`:
+
+```bash
+git clone https://github.com/noahsaso/my-pi ~/.my-pi
+pi
+# then type: /bootstrap
+```
+
+### Manual Setup
+
+#### 1. Global Prompt
 
 ```bash
 cp ~/.my-pi/AGENTS.md ~/.pi/agent/AGENTS.md
 ```
 
-### 2. Settings
+#### 2. Settings
 
 Copy the example settings to your pi config:
 
@@ -31,7 +42,7 @@ cp ~/.my-pi/settings.example.json ~/.pi/agent/settings.json
 
 Or merge into your existing `~/.pi/agent/settings.json`.
 
-### 3. Agents
+#### 3. Agents
 
 Copy agent definitions for the subagent extension:
 
@@ -40,7 +51,7 @@ mkdir -p ~/.pi/agent/agents
 cp ~/.my-pi/agents/*.md ~/.pi/agent/agents/
 ```
 
-### 4. Pi Skills (web search + browser)
+#### 4. Pi Skills (web search + browser)
 
 Install [pi-skills](https://github.com/badlogic/pi-skills) for web search and browser automation:
 
@@ -56,7 +67,7 @@ Remove any skills you don't need (we only keep `brave-search` and `browser-tools
 rm -rf ~/.pi/agent/skills/pi-skills/{gccli,gdcli,gmcli,transcribe,vscode,youtube-transcript}
 ```
 
-### 5. Environment Variables
+#### 5. Environment Variables
 
 Add to your shell profile (`~/.profile`, `~/.bashrc`, or `~/.zshrc`):
 
@@ -66,7 +77,7 @@ export BRAVE_API_KEY="your-brave-api-key"
 
 Get a free Brave Search API key at https://api-dashboard.search.brave.com/register (requires a "Free AI" subscription).
 
-### 6. Superpowers Skills
+#### 6. Superpowers Skills
 
 We use [superpowers](https://github.com/obra/superpowers) skills heavily. To set them up:
 
