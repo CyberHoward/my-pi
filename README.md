@@ -23,7 +23,11 @@ Or merge into your existing `~/.pi/agent/settings.json`.
 
 We use [superpowers](https://github.com/obra/superpowers) skills heavily. To set them up:
 
-1. Install superpowers in Claude Code (it caches to `~/.claude/plugins/cache/`)
+1. Install superpowers in Claude Code via the plugin marketplace:
+   ```bash
+   /plugin marketplace add obra/superpowers-marketplace
+   /plugin install superpowers@superpowers-marketplace
+   ```
 2. Find your installed version:
    ```bash
    ls ~/.claude/plugins/cache/claude-plugins-official/superpowers/
@@ -36,8 +40,9 @@ We use [superpowers](https://github.com/obra/superpowers) skills heavily. To set
      ]
    }
    ```
+   Replace `<VERSION>` with your installed version (e.g. `4.2.0`).
 
-Replace `<VERSION>` with your installed version (e.g. `4.2.0`).
+See the [superpowers README](https://github.com/obra/superpowers) for full setup docs and workflow details.
 
 ## Extensions
 
