@@ -1,15 +1,18 @@
 # my-pi
 
-Custom [pi](https://github.com/badlogic/pi-mono) extensions and skills.
+Custom [pi](https://github.com/badlogic/pi-mono) extensions, skills, and agents.
 
 ## Structure
 
 ```
 extensions/    # Pi extensions (auto-loaded via settings)
 skills/        # Pi skills (auto-loaded via settings)
+agents/        # Subagent definitions (copy to ~/.pi/agent/agents/)
 ```
 
 ## Setup
+
+### 1. Settings
 
 Copy the example settings to your pi config:
 
@@ -19,7 +22,42 @@ cp ~/.my-pi/settings.example.json ~/.pi/agent/settings.json
 
 Or merge into your existing `~/.pi/agent/settings.json`.
 
-### Superpowers Skills
+### 2. Agents
+
+Copy agent definitions for the subagent extension:
+
+```bash
+mkdir -p ~/.pi/agent/agents
+cp ~/.my-pi/agents/*.md ~/.pi/agent/agents/
+```
+
+### 3. Pi Skills (web search + browser)
+
+Install [pi-skills](https://github.com/badlogic/pi-skills) for web search and browser automation:
+
+```bash
+git clone https://github.com/badlogic/pi-skills ~/.pi/agent/skills/pi-skills
+cd ~/.pi/agent/skills/pi-skills/brave-search && npm install
+cd ~/.pi/agent/skills/pi-skills/browser-tools && npm install
+```
+
+Remove any skills you don't need (we only keep `brave-search` and `browser-tools`):
+
+```bash
+rm -rf ~/.pi/agent/skills/pi-skills/{gccli,gdcli,gmcli,transcribe,vscode,youtube-transcript}
+```
+
+### 4. Environment Variables
+
+Add to your shell profile (`~/.profile`, `~/.bashrc`, or `~/.zshrc`):
+
+```bash
+export BRAVE_API_KEY="your-brave-api-key"
+```
+
+Get a free Brave Search API key at https://api-dashboard.search.brave.com/register (requires a "Free AI" subscription).
+
+### 5. Superpowers Skills
 
 We use [superpowers](https://github.com/obra/superpowers) skills heavily. To set them up:
 
@@ -67,12 +105,6 @@ Delegate tasks to specialized subagents with isolated context windows. From pi's
 **Tool:** `subagent` (single, parallel, or chained execution)
 **Prompts:** `/implement`, `/scout-and-plan`, `/implement-and-review`
 
-Agents are defined as markdown files in `~/.pi/agent/agents/` (copy from `agents/` in this repo):
-
-```bash
-cp ~/.my-pi/agents/*.md ~/.pi/agent/agents/
-```
-
 | Agent | Purpose | Model |
 |-------|---------|-------|
 | `scout` | Fast codebase recon | Haiku 4.5 |
@@ -86,3 +118,14 @@ Features:
 - Chaining with `{previous}` placeholder for sequential pipelines
 - Streaming output with live progress
 - Works with superpowers' subagent-driven-development skill
+
+## Skills (via pi-skills)
+
+Installed from [badlogic/pi-skills](https://github.com/badlogic/pi-skills) into `~/.pi/agent/skills/pi-skills/`.
+
+| Skill | Description | Requires |
+|-------|-------------|----------|
+| **brave-search** | Web search + page content extraction | `BRAVE_API_KEY` |
+| **browser-tools** | Browser automation via Chrome DevTools Protocol | Chrome |
+
+Usage: `/skill:brave-search "query"` or just ask naturally.
