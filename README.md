@@ -59,3 +59,25 @@ Features:
 - Removing items automatically rewrites dependency indices
 - State persists across session branches/forks
 - Interactive TUI view via `/todos`
+
+### subagent/
+
+Delegate tasks to specialized subagents with isolated context windows. From pi's [built-in example](https://github.com/badlogic/pi-mono/tree/main/packages/coding-agent/examples/extensions/subagent).
+
+**Tool:** `subagent` (single, parallel, or chained execution)
+**Prompts:** `/implement`, `/scout-and-plan`, `/implement-and-review`
+
+Agents are defined as markdown files in `~/.pi/agent/agents/`:
+| Agent | Purpose | Model |
+|-------|---------|-------|
+| `scout` | Fast codebase recon | Haiku |
+| `planner` | Implementation plans | Sonnet |
+| `reviewer` | Code review | Sonnet |
+| `worker` | General-purpose | Sonnet |
+
+Features:
+- Each subagent runs in an isolated `pi` process (no context pollution)
+- Parallel execution (up to 8 tasks, 4 concurrent)
+- Chaining with `{previous}` placeholder for sequential pipelines
+- Streaming output with live progress
+- Works with superpowers' subagent-driven-development skill
