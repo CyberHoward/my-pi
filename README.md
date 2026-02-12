@@ -17,18 +17,27 @@ Copy the example settings to your pi config:
 cp ~/.my-pi/settings.example.json ~/.pi/agent/settings.json
 ```
 
-Or merge into your existing `~/.pi/agent/settings.json`. The key entries are:
+Or merge into your existing `~/.pi/agent/settings.json`.
 
-```json
-{
-  "extensions": ["~/.my-pi/extensions"],
-  "skills": [
-    "~/.my-pi/skills",
-    "~/.claude/skills",
-    "~/.claude/plugins/cache/claude-plugins-official/superpowers/4.2.0/skills"
-  ]
-}
-```
+### Superpowers Skills
+
+We use [superpowers](https://github.com/claude-plugins-official/superpowers) skills heavily. To set them up:
+
+1. Install superpowers in Claude Code (it caches to `~/.claude/plugins/cache/`)
+2. Find your installed version:
+   ```bash
+   ls ~/.claude/plugins/cache/claude-plugins-official/superpowers/
+   ```
+3. Add the skills path to your `~/.pi/agent/settings.json`:
+   ```json
+   {
+     "skills": [
+       "~/.claude/plugins/cache/claude-plugins-official/superpowers/<VERSION>/skills"
+     ]
+   }
+   ```
+
+Replace `<VERSION>` with your installed version (e.g. `4.2.0`).
 
 ## Extensions
 

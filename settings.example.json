@@ -7,7 +7,6 @@
   ],
   "skills": [
     "~/.my-pi/skills",
-    "~/.claude/skills",
-    "~/.claude/plugins/cache/claude-plugins-official/superpowers/4.2.0/skills"
+    "~/.claude/skills"
   ]
 }
