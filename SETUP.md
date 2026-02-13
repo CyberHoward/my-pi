@@ -65,28 +65,7 @@ export BRAVE_API_KEY="<key>"
 
 ## 5. Superpowers
 
-Show the user these Claude Code commands to install superpowers:
-
-```
-/plugin marketplace add obra/superpowers-marketplace
-/plugin install superpowers@superpowers-marketplace
-```
-
-Then find the installed version:
-
-```bash
-ls ~/.claude/plugins/cache/claude-plugins-official/superpowers/
-```
-
-Add the skills path to `~/.pi/agent/settings.json`:
-
-```json
-{
-  "skills": [
-    "~/.claude/plugins/cache/claude-plugins-official/superpowers/<VERSION>/skills"
-  ]
-}
-```
+[Superpowers](https://github.com/obra/superpowers) skills are bundled in `~/.my-pi/skills/`. No separate installation needed — they're loaded automatically via the skills path in settings.
 
 ## 6. Extension Dependencies
 
