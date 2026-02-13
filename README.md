@@ -175,12 +175,26 @@ Features:
 
 ## Skills
 
-Bundled in `skills/` (originally from [badlogic/pi-skills](https://github.com/badlogic/pi-skills)).
+Bundled in `skills/` (browser/search from [badlogic/pi-skills](https://github.com/badlogic/pi-skills), workflow skills from [obra/superpowers](https://github.com/obra/superpowers)).
 
 | Skill | Description | Requires |
 |-------|-------------|----------|
 | **brave-search** | Web search + page content extraction | `BRAVE_API_KEY` |
 | **browser-tools** | Browser automation via Chrome DevTools Protocol | Chrome |
+| **brainstorming** | Explores intent, requirements and design before creative work | — |
+| **dispatching-parallel-agents** | Run 2+ independent tasks in parallel | — |
+| **executing-plans** | Execute implementation plans with review checkpoints | — |
+| **finishing-a-development-branch** | Guide branch completion (merge, PR, cleanup) | — |
+| **receiving-code-review** | Process code review feedback with technical rigor | — |
+| **requesting-code-review** | Verify work meets requirements before merging | — |
+| **subagent-driven-development** | Execute plans via independent subagent tasks | — |
+| **systematic-debugging** | Root-cause analysis before proposing fixes | — |
+| **test-driven-development** | Write tests before implementation | — |
+| **using-git-worktrees** | Create isolated worktrees for feature work | — |
+| **using-superpowers** | Establishes how to find and use skills | — |
+| **verification-before-completion** | Run verification commands before claiming done | — |
+| **writing-plans** | Create multi-step implementation plans from specs | — |
+| **writing-skills** | Create, edit, and verify skills | — |
 
 ### browser-tools
 
@@ -193,3 +207,7 @@ Tools: `browser-start.js`, `browser-nav.js`, `browser-eval.js`, `browser-screens
 Tools: `search.js`, `content.js`
 
 Usage: `/skill:brave-search "query"` or just ask naturally.
+
+### superpowers
+
+14 workflow skills from [obra/superpowers](https://github.com/obra/superpowers) that enforce disciplined development practices — brainstorming before building, writing tests before code, systematic debugging before fixing, and verification before claiming done. These are pure SKILL.md files with no dependencies.
