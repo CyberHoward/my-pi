@@ -42,20 +42,13 @@ mkdir -p ~/.pi/agent/agents
 cp ~/.my-pi/agents/*.md ~/.pi/agent/agents/
 ```
 
-#### 4. Pi Skills (web search + browser)
+#### 4. Skills (web search + browser)
 
-Install [pi-skills](https://github.com/badlogic/pi-skills) for web search and browser automation:
-
-```bash
-git clone https://github.com/badlogic/pi-skills ~/.pi/agent/skills/pi-skills
-cd ~/.pi/agent/skills/pi-skills/brave-search && npm install
-cd ~/.pi/agent/skills/pi-skills/browser-tools && npm install
-```
-
-Remove any skills you don't need (we only keep `brave-search` and `browser-tools`):
+Install dependencies for the bundled skills:
 
 ```bash
-rm -rf ~/.pi/agent/skills/pi-skills/{gccli,gdcli,gmcli,transcribe,vscode,youtube-transcript}
+cd ~/.my-pi/skills/brave-search && npm install
+cd ~/.my-pi/skills/browser-tools && npm install
 ```
 
 #### 5. Environment Variables
@@ -201,13 +194,23 @@ Features:
 - Track correction source (e.g. `source: "correction"`) for learning from mistakes
 - Most recent 50 memories injected (keeps context manageable)
 
-## Skills (via pi-skills)
+## Skills
 
-Installed from [badlogic/pi-skills](https://github.com/badlogic/pi-skills) into `~/.pi/agent/skills/pi-skills/`.
+Bundled in `skills/` (originally from [badlogic/pi-skills](https://github.com/badlogic/pi-skills)).
 
 | Skill | Description | Requires |
 |-------|-------------|----------|
 | **brave-search** | Web search + page content extraction | `BRAVE_API_KEY` |
 | **browser-tools** | Browser automation via Chrome DevTools Protocol | Chrome |
+
+### browser-tools
+
+Tools: `browser-start.js`, `browser-nav.js`, `browser-eval.js`, `browser-screenshot.js`, `browser-resize.js`, `browser-pick.js`, `browser-cookies.js`, `browser-content.js`
+
+`browser-resize.js` supports named device presets (`iphone`, `iphone-se`, `iphone-pro-max`, `ipad`, `ipad-pro`, `android`, `tablet`, `laptop`, `desktop`), custom `WxH` with `--dpr` and `--mobile` flags, and `reset` to clear overrides.
+
+### brave-search
+
+Tools: `search.js`, `content.js`
 
 Usage: `/skill:brave-search "query"` or just ask naturally.

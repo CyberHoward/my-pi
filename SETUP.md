@@ -23,15 +23,13 @@ mkdir -p ~/.pi/agent/agents
 cp ~/.my-pi/agents/*.md ~/.pi/agent/agents/
 ```
 
-## 3. Pi Skills
+## 3. Skills
 
-Install web search and browser automation:
+Install dependencies for the bundled skills (brave-search + browser-tools):
 
 ```bash
-git clone https://github.com/badlogic/pi-skills ~/.pi/agent/skills/pi-skills
-cd ~/.pi/agent/skills/pi-skills/brave-search && npm install
-cd ~/.pi/agent/skills/pi-skills/browser-tools && npm install
-rm -rf ~/.pi/agent/skills/pi-skills/{gccli,gdcli,gmcli,transcribe,vscode,youtube-transcript}
+cd ~/.my-pi/skills/brave-search && npm install
+cd ~/.my-pi/skills/browser-tools && npm install
 ```
 
 ### Browser (for browser-tools)
