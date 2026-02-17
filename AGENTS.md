@@ -21,7 +21,7 @@ Use todos proactively when working on multi-step tasks, implementation plans, or
 Delegate tasks to specialized subagents with isolated context windows.
 
 **Available agents:**
-- `scout` (Haiku 4.5) — Fast codebase recon, returns structured findings for handoff
+- `scout` (Sonnet 4.6) — Fast codebase recon, returns structured findings for handoff
 - `planner` (Opus 4.6) — Creates implementation plans from context
 - `reviewer` (Opus 4.6) — Code review for quality and security
 - `worker` (Opus 4.6) — General-purpose implementation with full tool access
