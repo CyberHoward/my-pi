@@ -108,6 +108,19 @@ Use memory for:
 - Remembering project conventions and preferences
 - Storing decisions made during sessions
 
+### Context Management (`/skill:context-management`)
+
+Git-like context management for long sessions. Use `/context` to view token usage dashboard.
+
+- `context_tag` — Create named milestones in conversation history
+- `context_log` — Visualize conversation history and token usage
+- `context_checkout` — Move HEAD to any tag/commit, compress completed tasks into summaries
+
+Use context management for:
+- Structuring long sessions with milestones
+- Monitoring token usage
+- Compressing completed work to free context space
+
 ## Workflow Preferences
 
 - Use **superpowers skills** when available (brainstorming, writing-plans, subagent-driven-development, test-driven-development, etc.)

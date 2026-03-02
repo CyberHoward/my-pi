@@ -5,10 +5,12 @@
   "extensions": [
     "~/.my-pi/extensions"
   ],
-
   "skills": [
     "~/.my-pi/skills",
     "~/.my-pi/skills/superpowers",
     "~/.claude/skills"
+  ],
+  "packages": [
+    "npm:pi-context"
   ]
 }

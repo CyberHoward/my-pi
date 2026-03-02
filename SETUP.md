@@ -75,6 +75,18 @@ Install npm dependencies for the code-ast extension:
 cd ~/.my-pi/extensions/code-ast && npm install
 ```
 
-## 7. Verify
+## 7. Packages
+
+Install npm packages listed in settings.json:
+
+```bash
+pi install npm:pi-context
+```
+
+**[pi-context](https://github.com/ttttmr/pi-context)** - Git-like context management for AI agents:
+- `/context` - View token usage dashboard
+- `/skill:context-management` - Enable the workflow with tools: `context_tag`, `context_log`, `context_checkout`
+
+## 8. Verify
 
 Run `pi -p "list all available tools"` to confirm everything loaded.
