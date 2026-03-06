@@ -1,6 +1,6 @@
 # Setup
 
-Follow these steps to set up this pi instance.
+Follow these steps to set up pi with this configuration.
 
 ## 1. Settings
 
@@ -25,31 +25,22 @@ cp ~/.my-pi/agents/*.md ~/.pi/agent/agents/
 
 ## 3. Skills
 
-Install dependencies for the bundled skills (brave-search + browser-tools):
+Install dependencies for the bundled skills:
 
 ```bash
 cd ~/.my-pi/skills/brave-search && npm install
 cd ~/.my-pi/skills/browser-tools && npm install
 ```
 
-### Browser (for browser-tools)
+## 4. Extension Dependencies
 
-**macOS:** Chrome is usually already installed. If not: `brew install --cask google-chrome`
+Install npm dependencies for the code-ast extension:
 
-**Linux:**
 ```bash
-# Option 1: Chrome (recommended — works without snap)
-wget -q -O /tmp/chrome.deb https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo dpkg -i /tmp/chrome.deb
-sudo apt-get install -f -y
-
-# Option 2: Chromium (if snap is available)
-sudo snap install chromium
+cd ~/.my-pi/extensions/code-ast && npm install
 ```
 
-The `browser-start.js` script auto-detects Chrome or Chromium on both macOS and Linux. On headless Linux (no DISPLAY), it runs in headless mode automatically.
-
-## 4. Environment Variables
+## 5. Environment Variables
 
 Check if `BRAVE_API_KEY` is set:
 
@@ -63,19 +54,9 @@ If not set, ask the user for their key and add it to `~/.profile`:
 export BRAVE_API_KEY="<key>"
 ```
 
-## 5. Superpowers
+Get a free Brave Search API key at https://api-dashboard.search.brave.com/register
 
-[Superpowers](https://github.com/obra/superpowers) skills are bundled in `~/.my-pi/skills/`. No separate installation needed — they're loaded automatically via the skills path in settings.
-
-## 6. Extension Dependencies
-
-Install npm dependencies for the code-ast extension:
-
-```bash
-cd ~/.my-pi/extensions/code-ast && npm install
-```
-
-## 7. Packages
+## 6. Packages
 
 Install npm packages listed in settings.json:
 
@@ -83,10 +64,6 @@ Install npm packages listed in settings.json:
 pi install npm:pi-context
 ```
 
-**[pi-context](https://github.com/ttttmr/pi-context)** - Git-like context management for AI agents:
-- `/context` - View token usage dashboard
-- `/skill:context-management` - Enable the workflow with tools: `context_tag`, `context_log`, `context_checkout`
-
-## 8. Verify
+## 7. Verify
 
 Run `pi -p "list all available tools"` to confirm everything loaded.

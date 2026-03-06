@@ -7,7 +7,6 @@
   ],
   "skills": [
     "~/.my-pi/skills",
-    "~/.my-pi/skills/superpowers",
     "~/.claude/skills"
   ],
   "packages": [
