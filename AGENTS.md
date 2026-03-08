@@ -13,6 +13,7 @@ Delegate tasks to specialized subagents with isolated context windows.
 - `planner` (Opus 4.6) — Creates implementation plans from context
 - `reviewer` (Opus 4.6) — Code review for quality and security
 - `worker` (Opus 4.6) — General-purpose implementation with full tool access
+- `tooling-researcher` (Sonnet 4.5) — Deep-dives into tools/libraries, researches both official docs (via brave-search) and local codebase usage to produce teaching material
 
 **Modes:**
 - Single: `{ agent: "scout", task: "find all auth code" }`

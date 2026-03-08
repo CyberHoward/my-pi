@@ -95,22 +95,80 @@ function findNearestProjectAgentsDir(cwd: string): string | null {
 	}
 }
 
+/**
+ * Read an `agents` array from a settings.json file and resolve paths relative to its directory.
+ * Returns resolved directory paths.
+ */
+function loadAgentPathsFromSettings(settingsPath: string): string[] {
+	try {
+		const raw = fs.readFileSync(settingsPath, "utf-8");
+		const settings = JSON.parse(raw);
+		const agentPaths: unknown[] = settings.agents;
+		if (!Array.isArray(agentPaths)) return [];
+
+		const baseDir = path.dirname(settingsPath);
+		const resolved: string[] = [];
+		for (const p of agentPaths) {
+			if (typeof p !== "string") continue;
+			const expanded = p.startsWith("~") ? path.join(os.homedir(), p.slice(1)) : p;
+			const abs = path.isAbsolute(expanded) ? expanded : path.resolve(baseDir, expanded);
+			resolved.push(abs);
+		}
+		return resolved;
+	} catch {
+		return [];
+	}
+}
+
 export function discoverAgents(cwd: string, scope: AgentScope): AgentDiscoveryResult {
 	const userDir = path.join(os.homedir(), ".pi", "agent", "agents");
 	const projectAgentsDir = findNearestProjectAgentsDir(cwd);
 
+	// Load agents from default directories
 	const userAgents = scope === "project" ? [] : loadAgentsFromDir(userDir, "user");
 	const projectAgents = scope === "user" || !projectAgentsDir ? [] : loadAgentsFromDir(projectAgentsDir, "project");
+
+	// Load additional agents from settings.json `agents` paths
+	const globalSettingsPath = path.join(os.homedir(), ".pi", "agent", "settings.json");
+	const settingsUserAgents: AgentConfig[] = [];
+	const settingsProjectAgents: AgentConfig[] = [];
+
+	if (scope !== "project") {
+		for (const dir of loadAgentPathsFromSettings(globalSettingsPath)) {
+			settingsUserAgents.push(...loadAgentsFromDir(dir, "user"));
+		}
+	}
+
+	if (scope !== "user") {
+		// Walk up to find nearest .pi/settings.json
+		let dir = cwd;
+		while (true) {
+			const candidate = path.join(dir, ".pi", "settings.json");
+			if (fs.existsSync(candidate)) {
+				for (const agentDir of loadAgentPathsFromSettings(candidate)) {
+					settingsProjectAgents.push(...loadAgentsFromDir(agentDir, "project"));
+				}
+				break;
+			}
+			const parent = path.dirname(dir);
+			if (parent === dir) break;
+			dir = parent;
+		}
+	}
 
 	const agentMap = new Map<string, AgentConfig>();
 
 	if (scope === "both") {
 		for (const agent of userAgents) agentMap.set(agent.name, agent);
+		for (const agent of settingsUserAgents) agentMap.set(agent.name, agent);
 		for (const agent of projectAgents) agentMap.set(agent.name, agent);
+		for (const agent of settingsProjectAgents) agentMap.set(agent.name, agent);
 	} else if (scope === "user") {
 		for (const agent of userAgents) agentMap.set(agent.name, agent);
+		for (const agent of settingsUserAgents) agentMap.set(agent.name, agent);
 	} else {
 		for (const agent of projectAgents) agentMap.set(agent.name, agent);
+		for (const agent of settingsProjectAgents) agentMap.set(agent.name, agent);
 	}
 
 	return { agents: Array.from(agentMap.values()), projectAgentsDir };
