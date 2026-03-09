@@ -17,7 +17,7 @@ Scaffold `.comprehension/` directory mirroring the source tree.
 
 1. Check if `.comprehension/config.json` exists. If not, create with defaults.
 2. List git-tracked source files: `git ls-files`
-3. Filter by `include`/`exclude` globs from config. Also exclude non-source files (images, binaries, lockfiles).
+3. Filter by `include`/`exclude` globs from config. Then apply the **default-ignore list** below (always excluded regardless of config). The user can override by explicitly adding patterns to `include`.
 4. For each file, create `.comprehension/<path>.md` with frontmatter:
    ```yaml
    ---
@@ -39,14 +39,15 @@ Walk through files needing review and validate understanding.
 2. Call `comprehension_coverage` tool.
 3. Select next file to review. Priority: `none` > `stale: true` > `surface`.
 4. Show the user which file to review. Tell them to read the source file and write their understanding in the corresponding `.md` file.
-5. Wait for user to confirm they've written their description.
-6. Read BOTH the source file AND the user's `.md` description.
-7. Evaluate accuracy and completeness:
+5. **Open both files in the editor.** Detect the editor CLI: try `cursor` first, then `code`. Use the found binary to open both the source file and the `.comprehension/*.md` file (e.g., `cursor -g <source-file>` and `cursor -g <comprehension-md-file>`). If neither CLI is found, skip and tell the user to open the files manually.
+6. Wait for user to confirm they've written their description.
+7. Read BOTH the source file AND the user's `.md` description.
+8. Evaluate accuracy and completeness:
    - Identify what's correct
    - Identify gaps or misconceptions
    - Assign comprehension level: `none` | `surface` | `partial` | `solid` | `expert`
-8. Update the `.md` frontmatter: set `comprehension`, `last-reviewed` (today's date), `last-source-commit` (current HEAD), remove `stale` if present.
-9. Share feedback with user, then ask if they want to continue to the next file.
+9. Update the `.md` frontmatter: set `comprehension`, `last-reviewed` (today's date), `last-source-commit` (current HEAD), remove `stale` if present.
+10. Share feedback with user, then ask if they want to continue to the next file.
 
 **Comprehension levels:**
 | Level | Score | Meaning |
@@ -73,7 +74,7 @@ Report comprehension coverage by architectural component.
 
 Detect source changes and smart-downgrade comprehension levels.
 
-1. Call `git_changes` tool (uses `lastCheckCommit` from config → HEAD). If no `lastCheckCommit`, inform user to run `setup` first.
+1. Call `git_changes` tool (uses `lastCheckCommit` from config → HEAD). Pass the `cwd` parameter pointing to the project root (where `.comprehension/` lives) if it differs from pi's process cwd. If no `lastCheckCommit`, inform user to run `setup` first.
 2. For each changed file that has a `.comprehension/*.md` counterpart:
    - Call `git_changes` with `includeDiffs: true` for that file
    - Read the diff and classify:
@@ -97,3 +98,19 @@ Detect source changes and smart-downgrade comprehension levels.
 ```
 
 Component derivation: first directory segment under project root. Override via `components` map in config or `component` field in individual `.md` frontmatter.
+
+## Default-Ignore List
+
+These file types are **always excluded** during `setup` and `update` (added files), regardless of config `include`/`exclude`. They are non-source files that don't benefit from comprehension tracking.
+
+| Category | Patterns |
+|----------|----------|
+| **Images** | `*.png`, `*.jpg`, `*.jpeg`, `*.gif`, `*.svg`, `*.ico`, `*.webp`, `*.bmp` |
+| **Fonts** | `*.woff`, `*.woff2`, `*.ttf`, `*.eot` |
+| **Binaries** | `*.pdf`, `*.zip`, `*.tar`, `*.gz`, `*.bin`, `*.exe`, `*.dll`, `*.so`, `*.dylib` |
+| **Lockfiles** | `package-lock.json`, `Cargo.lock`, `devbox.lock`, `*.lockb`, `yarn.lock`, `pnpm-lock.yaml`, `bun.lockb` |
+| **Documentation** | `*.md` |
+| **Dotfiles/config** | `.gitignore`, `.claude/**`, `.pi/**`, `.comprehension/**` |
+| **Tests** (from config defaults) | `*.test.*`, `*.spec.*`, `__tests__/**` |
+
+To include a normally-ignored pattern, add it explicitly to `include` in config (e.g., `["**/*.md"]` to track markdown files).

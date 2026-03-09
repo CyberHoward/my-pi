@@ -24,9 +24,14 @@ export default function comprehensionTools(pi: ExtensionAPI) {
       includeDiffs: Type.Optional(
         Type.Boolean({ description: "Include file diffs in output (default: false)" }),
       ),
+      cwd: Type.Optional(
+        Type.String({
+          description: "Working directory / git repo root to run git commands in (defaults to pi's cwd)",
+        }),
+      ),
     }),
     async execute(toolCallId, params, signal, onUpdate, ctx) {
-      const cwd = ctx.cwd;
+      const cwd = params.cwd ? path.resolve(ctx.cwd, params.cwd) : ctx.cwd;
       const config = readConfig(cwd);
 
       const from = params.fromCommit || config.lastCheckCommit;
