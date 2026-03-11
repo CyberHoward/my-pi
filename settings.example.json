@@ -3,11 +3,15 @@
   "doubleEscapeAction": "tree",
   "theme": "dark",
   "extensions": [
-    "~/.my-pi/extensions"
+    "~/.my-pi/general/extensions",
+    "~/.my-pi/engineering/extensions",
+    "~/.my-pi/personal/extensions"
   ],
   "skills": [
-    "~/.my-pi/skills",
-    "~/.my-pi/skills/superpowers",
+    "~/.my-pi/general/skills",
+    "~/.my-pi/engineering/skills",
+    "~/.my-pi/engineering/skills/superpowers",
+    "~/.my-pi/personal/skills",
     "~/.claude/skills"
   ],
   "packages": [

@@ -20,7 +20,7 @@ Copy subagent definitions:
 
 ```bash
 mkdir -p ~/.pi/agent/agents
-cp ~/.my-pi/agents/*.md ~/.pi/agent/agents/
+cp ~/.my-pi/engineering/agents/*.md ~/.pi/agent/agents/
 ```
 
 ## 3. Skills
@@ -28,8 +28,8 @@ cp ~/.my-pi/agents/*.md ~/.pi/agent/agents/
 Install dependencies for the bundled skills:
 
 ```bash
-cd ~/.my-pi/skills/brave-search && npm install
-cd ~/.my-pi/skills/browser-tools && npm install
+cd ~/.my-pi/general/skills/brave-search && npm install
+cd ~/.my-pi/general/skills/browser-tools && npm install
 ```
 
 ## 4. Extension Dependencies
@@ -37,7 +37,7 @@ cd ~/.my-pi/skills/browser-tools && npm install
 Install npm dependencies for the code-ast extension:
 
 ```bash
-cd ~/.my-pi/extensions/code-ast && npm install
+cd ~/.my-pi/engineering/extensions/code-ast && npm install
 ```
 
 ## 5. Environment Variables
@@ -67,3 +67,21 @@ pi install npm:pi-context
 ## 7. Verify
 
 Run `pi -p "list all available tools"` to confirm everything loaded.
+
+## Directory Structure
+
+```
+~/.my-pi/
+├── general/          # General-purpose tools (any context)
+│   ├── agents/
+│   ├── extensions/   # subagent, notifications, memory
+│   └── skills/       # brave-search, browser-tools
+├── engineering/      # Software engineering tools
+│   ├── agents/       # scout, planner, reviewer, worker, remover
+│   ├── extensions/   # code-ast
+│   └── skills/       # superpowers
+└── personal/         # Personal tools
+    ├── agents/
+    ├── extensions/
+    └── skills/
+```

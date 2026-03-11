@@ -5,11 +5,18 @@ Personal [pi](https://github.com/badlogic/pi-mono) dotfiles — extensions, skil
 ## Structure
 
 ```
-AGENTS.md      # Global workflow preferences (copy to ~/.pi/agent/AGENTS.md)
-SETUP.md       # Step-by-step setup instructions for pi to follow
-extensions/    # Pi extensions (auto-loaded via settings)
-skills/        # Pi skills (auto-loaded via settings)
-agents/        # Subagent definitions (copy to ~/.pi/agent/agents/)
+~/.my-pi/
+├── AGENTS.md              # Global workflow preferences (copy to ~/.pi/agent/AGENTS.md)
+├── SETUP.md               # Step-by-step setup instructions for pi to follow
+├── settings.example.json  # Example ~/.pi/agent/settings.json
+├── engineering/           # Software development tools
+│   ├── agents/            # Subagent definitions (scout, planner, reviewer, worker)
+│   ├── extensions/        # code-ast (TS-aware code intelligence)
+│   └── skills/            # Superpowers (TDD, debugging, code review, planning, etc.)
+├── general/               # General-purpose tools (useful everywhere)
+│   ├── extensions/        # subagent, memory, notifications
+│   └── skills/            # brave-search, browser-tools
+└── personal/              # Personal skills (non-engineering workflows)
 ```
 
 ## Quick Start
@@ -19,49 +26,93 @@ git clone git@github.com:CyberHoward/my-pi.git ~/.my-pi
 cd ~/.my-pi && pi "Read SETUP.md and walk me through setup."
 ```
 
-## Extensions
+## Directory Layout
 
-### subagent/
+### `general/` — Always useful
 
-Delegate tasks to specialized subagents with isolated context windows.
+Extensions and skills that are valuable in any context.
 
-**Tool:** `subagent` (single, parallel, or chained execution)
-**Prompts:** `/implement`, `/scout-and-plan`, `/implement-and-review`
+| Component | Type | Description |
+|-----------|------|-------------|
+| **subagent/** | Extension | Delegate tasks to specialized subagents with isolated context windows. Tool: `subagent`. Prompts: `/implement`, `/scout-and-plan`, `/implement-and-review` |
+| **memory.ts** | Extension | Persistent memory across sessions. Tools: `memory_save`, `memory_search`, `memory_list`, `memory_remove` |
+| **notifications/** | Extension | System notifications with chime. Tools: `notify`, `ask_user`. Command: `/ping` |
+| **brave-search/** | Skill | Web search + page content extraction. Requires `BRAVE_API_KEY` |
+| **browser-tools/** | Skill | Browser automation via Chrome DevTools Protocol. Requires Chrome |
 
-| Agent | Purpose | Model |
-|-------|---------|-------|
-| `scout` | Fast codebase recon | Sonnet 4.6 |
-| `planner` | Implementation plans | Opus 4.6 |
-| `reviewer` | Code review | Opus 4.6 |
-| `worker` | General-purpose | Opus 4.6 |
+### `engineering/` — Software development
 
-### code-ast/
+Tools for coding workflows. Only load these in engineering projects.
 
-TypeScript-aware code intelligence: find references, rename symbols, list declarations.
+| Component | Type | Description |
+|-----------|------|-------------|
+| **code-ast/** | Extension | TypeScript-aware code intelligence. Tools: `ast_references`, `ast_rename`, `ast_symbols` |
+| **agents/** | Agents | Subagent definitions: `scout` (Sonnet 4.6), `planner` (Opus 4.6), `reviewer` (Opus 4.6), `worker` (Opus 4.6) |
+| **superpowers/** | Skills | Brainstorming, TDD, systematic debugging, code review, git worktrees, planning, and more — from [superpowers](https://github.com/obra/superpowers) |
 
-**Tools:** `ast_references`, `ast_rename`, `ast_symbols`
+### `personal/` — Non-engineering workflows
 
-### notifications/
+Add your own skills here for personal productivity, writing, knowledge management, etc.
 
-System notifications with a custom chime sound. Cross-platform (macOS + Linux).
+## Usage
 
-**Tools:** `notify`, `ask_user`  
-**Command:** `/ping`
+### Global setup (loads everywhere)
 
-### memory.ts
+Merge into `~/.pi/agent/settings.json`:
 
-Persistent memory across sessions.
+```json
+{
+  "extensions": [
+    "~/.my-pi/general/extensions",
+    "~/.my-pi/engineering/extensions"
+  ],
+  "skills": [
+    "~/.my-pi/general/skills",
+    "~/.my-pi/engineering/skills",
+    "~/.my-pi/engineering/skills/superpowers",
+    "~/.my-pi/personal"
+  ]
+}
+```
 
-**Tools:** `memory_save`, `memory_search`, `memory_list`, `memory_remove`
+Then copy agents and global prompt:
 
-## Skills
+```bash
+cp ~/.my-pi/AGENTS.md ~/.pi/agent/AGENTS.md
+mkdir -p ~/.pi/agent/agents
+cp ~/.my-pi/engineering/agents/*.md ~/.pi/agent/agents/
+```
 
-| Skill | Description | Requires |
-|-------|-------------|----------|
-| **brave-search** | Web search + page content extraction | `BRAVE_API_KEY` |
-| **browser-tools** | Browser automation via Chrome DevTools Protocol | Chrome |
+### Per-project setup (selective loading)
 
-Superpowers skills (brainstorming, TDD, debugging, etc.) are loaded separately via the [superpowers](https://github.com/obra/superpowers) claude plugin.
+Create `.pi/settings.json` in a project root. For an **engineering** project:
+
+```json
+{
+  "extensions": [
+    "~/.my-pi/general/extensions",
+    "~/.my-pi/engineering/extensions"
+  ],
+  "skills": [
+    "~/.my-pi/general/skills",
+    "~/.my-pi/engineering/skills/superpowers"
+  ]
+}
+```
+
+For a **non-engineering** project (writing, personal):
+
+```json
+{
+  "extensions": [
+    "~/.my-pi/general/extensions"
+  ],
+  "skills": [
+    "~/.my-pi/general/skills",
+    "~/.my-pi/personal"
+  ]
+}
+```
 
 ## Environment Variables
 
