@@ -44,6 +44,15 @@ System notifications with a custom chime sound. Cross-platform (macOS + Linux).
 - `ask_user` — Play chime + notification + prompt user for input. **Use this when you need the user's attention.**
 - `/ping` — Test the chime sound
 
+### TickTick (`ticktick`)
+
+Personal task management via TickTick. Use this for the user's personal tasks, todos, and project planning — **not** for agentic or coding task tracking.
+
+- Actions: `list_projects`, `list_tasks`, `get_task`, `create_task`, `update_task`, `complete_task`, `uncomplete_task`, `delete_task`, `create_project`
+- Supports natural language dates (`"tomorrow"`, `"next friday"`, `"in 3 days"`)
+- Priority levels: `none`, `low`, `medium`, `high`
+- If auth fails, tell the user to run `tickrs init` and see `~/.my-pi/extensions/ticktick/setup.md`
+
 ### Persistent Memory (`memory_save`, `memory_search`, `memory_list`, `memory_remove`)
 
 Persistent memory across sessions. Memories are auto-injected into the system prompt.
