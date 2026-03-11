@@ -1,0 +1,3 @@
+[submodule "pi-remote"]
+	path = pi-remote
+	url = https://github.com/noahsaso/pi-remote.git
