@@ -5,7 +5,8 @@
   "extensions": [
     "~/.my-pi/general/extensions",
     "~/.my-pi/engineering/extensions",
-    "~/.my-pi/personal/extensions"
+    "~/.my-pi/personal/extensions",
+    "~/.my-pi/pi-remote/packages/remote"
   ],
   "skills": [
     "~/.my-pi/general/skills",

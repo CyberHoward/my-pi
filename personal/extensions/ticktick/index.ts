@@ -26,6 +26,7 @@ const TickTickParams = Type.Object({
 		"uncomplete_task",
 		"delete_task",
 		"create_project",
+		"load_config",
 	] as const),
 	project: Type.Optional(Type.String({ description: "Project name (required for task operations unless a default is set)" })),
 	task_id: Type.Optional(Type.String({ description: "Task ID (for get/update/complete/delete)" })),
@@ -100,6 +101,10 @@ function buildArgs(input: TickTickInput): string[] {
 			args.push("task", "delete", input.task_id!, "--force");
 			if (input.project) args.push("--project-name", input.project);
 			break;
+
+		case "load_config":
+			args.push("task", "list", "--project-name", "Config");
+			break;
 	}
 
 	args.push("--json");
@@ -155,6 +160,14 @@ function formatResult(action: string, raw: any): string {
 			return `Task deleted.`;
 		case "create_project":
 			return JSON.stringify(summarizeProject(data), null, 2);
+		case "load_config": {
+			const tasks = Array.isArray(data?.tasks) ? data.tasks : Array.isArray(data) ? data : [];
+			const notes = tasks.map((t: any) => ({
+				title: t.title,
+				content: t.content || "(empty)",
+			}));
+			return JSON.stringify(notes, null, 2);
+		}
 		default:
 			return JSON.stringify(data, null, 2);
 	}
@@ -168,10 +181,11 @@ export default function (pi: ExtensionAPI) {
 		label: "TickTick",
 		description:
 			"Manage the user's personal TickTick tasks and projects. " +
-			"Actions: list_projects, list_tasks, get_task, create_task, update_task, complete_task, uncomplete_task, delete_task, create_project. " +
+			"Actions: list_projects, list_tasks, get_task, create_task, update_task, complete_task, uncomplete_task, delete_task, create_project, load_config. " +
 			"Supports natural language dates (e.g. 'tomorrow', 'next friday'). " +
-			"Priority levels: none, low, medium, high.",
-		promptSnippet: "Manage TickTick tasks and projects (list, create, update, complete, delete)",
+			"Priority levels: none, low, medium, high. " +
+			"Use load_config to fetch the Config project (tag taxonomy, project guide, review checklist, priorities, processing rules).",
+		promptSnippet: "Manage TickTick tasks and projects (list, create, update, complete, delete, load_config)",
 		promptGuidelines: [
 			"Use this tool for the user's personal task management — NOT for agentic/coding task tracking.",
 			"Always provide the `project` parameter for task operations unless the user has set a default project.",
@@ -229,6 +243,7 @@ export default function (pi: ExtensionAPI) {
 		renderCall(args, theme) {
 			let text = theme.fg("toolTitle", theme.bold("ticktick "));
 			text += theme.fg("muted", args.action);
+			if (args.action === "load_config") text += " " + theme.fg("accent", "[Config]");
 			if (args.title) text += " " + theme.fg("dim", `"${args.title}"`);
 			if (args.project) text += " " + theme.fg("accent", `[${args.project}]`);
 			if (args.task_id) text += " " + theme.fg("accent", `#${args.task_id.slice(0, 8)}`);
