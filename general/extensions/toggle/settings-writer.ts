@@ -1,5 +1,5 @@
-import { readFile, writeFile, mkdir } from "node:fs/promises";
-import { join, dirname } from "node:path";
+import { readFile, writeFile, mkdir } from "fs/promises";
+import { join, dirname } from "path";
 import type { ComponentItem } from "./discovery.ts";
 import type { ToggleConfig } from "./config.ts";
 
