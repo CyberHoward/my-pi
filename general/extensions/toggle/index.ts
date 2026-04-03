@@ -28,7 +28,13 @@ async function hasProjectDir(cwd: string): Promise<boolean> {
 export default function toggleExtension(pi: ExtensionAPI) {
   pi.registerCommand("toggle", {
     description: "Toggle skills, extensions, and agents on/off",
-    autocomplete: () => ["project"],
+    getArgumentCompletions: (prefix: string) => {
+      const items = [
+        { value: "project", label: "project", description: "Edit project-level toggles" },
+      ];
+      const filtered = items.filter(i => i.value.startsWith(prefix));
+      return filtered.length > 0 ? filtered : null;
+    },
     handler: async (args, ctx) => {
       const cwd = ctx.cwd;
       const hasProject = await hasProjectDir(cwd);
@@ -114,7 +120,8 @@ export default function toggleExtension(pi: ExtensionAPI) {
       
       // Reload if anything changed
       if (changed) {
-        ctx.reload();
+        await ctx.reload();
+        return;
       }
     },
   });

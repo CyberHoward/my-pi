@@ -1,6 +1,6 @@
 import { DynamicBorder, getSettingsListTheme } from "@mariozechner/pi-coding-agent";
 import { Container, SettingsList, Text, matchesKey } from "@mariozechner/pi-tui";
-import type { SettingItem, TUI, Theme } from "@mariozechner/pi-tui";
+import type { SettingItem } from "@mariozechner/pi-tui";
 import type { ComponentGroup, ComponentItem } from "./discovery.ts";
 import type { ToggleConfig } from "./config.ts";
 import { isDisabled } from "./config.ts";
@@ -65,24 +65,26 @@ export function buildSettingItems(
 
   /**
    * Determine the group's effective value based on all leaf descendants.
+   * Returns "enabled" if any child is enabled (for proper toggle cycling),
+   * plus a partial flag when mixed.
    */
-  function getGroupValue(leaves: ComponentItem[]): "enabled" | "disabled" | "partial" {
-    if (leaves.length === 0) return "enabled";
+  function getGroupValue(leaves: ComponentItem[]): { value: "enabled" | "disabled"; partial: boolean; enabledCount: number } {
+    if (leaves.length === 0) return { value: "enabled", partial: false, enabledCount: 0 };
     
     let enabledCount = 0;
-    let disabledCount = 0;
     
     for (const leaf of leaves) {
-      if (isDisabled(config, leaf.relativePath)) {
-        disabledCount++;
-      } else {
+      if (!isDisabled(config, leaf.relativePath)) {
         enabledCount++;
       }
     }
     
-    if (disabledCount === 0) return "enabled";
-    if (enabledCount === 0) return "disabled";
-    return "partial";
+    const disabledCount = leaves.length - enabledCount;
+    
+    if (disabledCount === 0) return { value: "enabled", partial: false, enabledCount };
+    if (enabledCount === 0) return { value: "disabled", partial: false, enabledCount };
+    // Partial: show as "enabled" so toggling goes to "disabled" (turn all off)
+    return { value: "enabled", partial: true, enabledCount };
   }
 
   /**
@@ -113,14 +115,20 @@ export function buildSettingItems(
       // It's a group (ComponentGroup)
       const group = node as ComponentGroup;
       const leaves = collectLeaves(group.children);
-      const groupValue = getGroupValue(leaves);
+      const groupResult = getGroupValue(leaves);
       const childIds = leaves.map(l => l.relativePath);
+      
+      // Show partial state in description (e.g., "3/5 enabled")
+      const description = groupResult.partial 
+        ? `${groupResult.enabledCount}/${leaves.length} enabled` 
+        : undefined;
       
       result.push({
         id: group.id,
         label: `${indent}▸ ${capitalize(group.label)}`,
-        currentValue: groupValue,
+        currentValue: groupResult.value,
         values: ["enabled", "disabled"],
+        description,
         childIds,
       });
       
@@ -147,8 +155,8 @@ export function buildSettingItems(
  * Create the toggle UI component.
  */
 export function createToggleUI(
-  tui: TUI,
-  theme: Theme,
+  tui: any,
+  theme: any,
   done: (result: { switchScope: "global" | "project" } | null | undefined) => void,
   options: ToggleUIOptions
 ): { render: (w: number) => string[]; invalidate: () => void; handleInput: (data: string) => void } {
@@ -183,7 +191,7 @@ export function createToggleUI(
   // Help text
   const helpParts: string[] = ["↑↓ navigate", "enter toggle", "/ search", "esc close"];
   if (hasProject) {
-    helpParts.push("g global", "p project");
+    helpParts.push("tab scope");
   }
   const helpText = theme.fg("dim", helpParts.join(" • "));
   container.addChild(new Text(helpText, 1, 0));
@@ -199,20 +207,10 @@ export function createToggleUI(
       container.invalidate();
     },
     handleInput(data: string): void {
-      // Handle scope switching keys
-      if (hasProject) {
-        if (matchesKey(data, "g")) {
-          if (scope !== "global") {
-            onScopeChange("global");
-          }
-          return;
-        }
-        if (matchesKey(data, "p")) {
-          if (scope !== "project") {
-            onScopeChange("project");
-          }
-          return;
-        }
+      // Handle scope switching with Tab (cycles global <-> project)
+      if (hasProject && matchesKey(data, "tab")) {
+        onScopeChange(scope === "global" ? "project" : "global");
+        return;
       }
       
       // Delegate everything else to SettingsList
