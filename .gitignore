@@ -3,3 +3,7 @@ node_modules/
 *.d.ts
 *.map
 toggle-config.json
+
+# But track skill scripts
+!general/skills/brave-search/*.js
+!general/skills/browser-tools/*.js
