@@ -9,6 +9,8 @@ Execute plan by dispatching fresh subagent per task, with two-stage review after
 
 **Core principle:** Fresh subagent per task + two-stage review (spec then quality) = high quality, fast iteration
 
+**This is not optional.** When this skill is in use, you MUST dispatch a fresh subagent for each task. Do not implement tasks yourself in the main context — that defeats the purpose (fresh context, isolation, parallel-safety). If in doubt whether to dispatch, dispatch.
+
 ## When to Use
 
 ```dot
@@ -200,6 +202,7 @@ Done!
 
 **Never:**
 - Start implementation on main/master branch without explicit user consent
+- Implement a task yourself in the main context to "save time" or because the task "looks simple" — dispatch a subagent
 - Skip reviews (spec compliance OR code quality)
 - Proceed with unfixed issues
 - Dispatch multiple implementation subagents in parallel (conflicts)

@@ -93,6 +93,7 @@ git commit -m "feat: add specific feature"
 - Exact commands with expected output
 - Reference relevant skills with @ syntax
 - DRY, YAGNI, TDD, frequent commits
+- **Positive examples over prohibitions.** Show the exact shape of the expected output/code/commit message rather than listing things the implementer shouldn't do. "Commit message: `feat(x): add y`" beats "Don't use generic commit messages."
 
 ## Execution Handoff
 

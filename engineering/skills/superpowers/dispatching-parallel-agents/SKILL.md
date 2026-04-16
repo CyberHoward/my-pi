@@ -11,6 +11,8 @@ When you have multiple unrelated failures (different test files, different subsy
 
 **Core principle:** Dispatch one agent per independent problem domain. Let them work concurrently.
 
+**This is not optional.** When the triggering conditions below are met, you MUST dispatch parallel agents — do not investigate sequentially "because it's simpler" or handle them yourself in the main context. Sequential investigation of independent problems wastes time and pollutes context.
+
 ## When to Use
 
 ```dot

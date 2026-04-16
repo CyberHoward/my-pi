@@ -13,6 +13,8 @@ Random fixes waste time and create new bugs. Quick patches mask underlying issue
 
 **Violating the letter of this process is violating the spirit of debugging.**
 
+**Think carefully through each phase before acting.** Debugging is multi-step reasoning. If you feel pressure to skip phases or jump to fixes, that is the signal to slow down, not speed up.
+
 ## The Iron Law
 
 ```

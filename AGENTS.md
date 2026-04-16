@@ -83,3 +83,14 @@ Git-like context management for long sessions. Use `/context` to view token usag
 - Use **superpowers skills** when available (brainstorming, writing-plans, subagent-driven-development, test-driven-development, etc.)
 - Use **subagents** for delegation — scout first, then plan, then implement
 - Search the web with **brave-search** when you need current docs or information
+
+## Prompting Notes (Claude Opus 4.7)
+
+Opus 4.7 interprets instructions literally and calibrates behavior per task rather than following fixed scaffolding. Adjust accordingly:
+
+- **Be explicit about delegation.** 4.7 spawns fewer subagents by default. When a skill or workflow requires a subagent, state it as a requirement ("dispatch X"), not a suggestion ("consider using X").
+- **Be explicit about tool use.** 4.7 reasons more and uses tools less. When a task needs tool calls (scout a codebase, run a verification command, search the web), say so directly.
+- **Don't rely on inferred intent.** If you want a specific behavior, write it. 4.7 will not silently generalize from one item to another or infer requests you didn't make.
+- **Skip progress scaffolding.** Don't add instructions like "summarize progress every N tool calls" — 4.7 produces user-facing progress updates natively in long agentic traces. If the update style is wrong, describe the desired style explicitly with examples.
+- **Prefer positive examples over negative rules.** "Respond in 2-3 sentences with the file path" beats "Don't be verbose, don't add preamble, don't explain." Show the shape you want.
+- **Raise effort for complex work.** At low/medium effort, 4.7 scopes tightly to what was asked. For genuinely complex reasoning, either raise effort or add "think carefully through this before responding" to the prompt.
