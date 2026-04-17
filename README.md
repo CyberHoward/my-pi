@@ -36,6 +36,7 @@ Extensions and skills that are valuable in any context.
 | Component | Type | Description |
 |-----------|------|-------------|
 | **subagent/** | Extension | Delegate tasks to specialized subagents with isolated context windows. Tool: `subagent`. Prompts: `/implement`, `/scout-and-plan`, `/implement-and-review` |
+| **toggle/** | Extension | TUI dashboard for enabling/disabling skills, extensions, and agents. Command: `/toggle` (global) or `/toggle project` (per-project) |
 | **memory.ts** | Extension | Persistent memory across sessions. Tools: `memory_save`, `memory_search`, `memory_list`, `memory_remove` |
 | **notifications/** | Extension | System notifications with chime. Tools: `notify`, `ask_user`. Command: `/ping` |
 | **brave-search/** | Skill | Web search + page content extraction. Requires `BRAVE_API_KEY` |
@@ -49,7 +50,7 @@ Tools for coding workflows. Only load these in engineering projects.
 | Component | Type | Description |
 |-----------|------|-------------|
 | **code-ast/** | Extension | TypeScript-aware code intelligence. Tools: `ast_references`, `ast_rename`, `ast_symbols` |
-| **agents/** | Agents | Subagent definitions: `scout` (Sonnet 4.6), `planner` (Opus 4.6), `reviewer` (Opus 4.6), `worker` (Opus 4.6) |
+| **agents/** | Agents | Subagent definitions: `scout` (Sonnet 4.6), `planner` (Opus 4.7), `reviewer` (Opus 4.7), `worker` (Opus 4.7) |
 | **superpowers/** | Skills | Brainstorming, TDD, systematic debugging, code review, git worktrees, planning, and more — from [superpowers](https://github.com/obra/superpowers) |
 
 ### `personal/` — Non-engineering workflows
