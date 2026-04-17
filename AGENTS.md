@@ -74,6 +74,10 @@ Search the web and extract page content. Use when you need current information, 
 
 Full browser automation via Chrome DevTools Protocol. Use for interacting with web pages, testing UIs, or scraping dynamic content.
 
+### Clean Web Page Extraction (`/skill:defuddle`)
+
+When the user gives you a URL to a standard web page (article, docs, blog post) and you need its content, **prefer the `defuddle` skill over `WebFetch`** — it strips navigation/ads/cruft and saves tokens. Skip for URLs ending in `.md` (already clean) and for dynamic pages where you actually need `browser-tools`.
+
 ### Context Management (`/skill:context-management`)
 
 Git-like context management for long sessions. Use `/context` to view token usage dashboard.
@@ -82,7 +86,7 @@ Git-like context management for long sessions. Use `/context` to view token usag
 
 - Use **superpowers skills** when available (brainstorming, writing-plans, subagent-driven-development, test-driven-development, etc.)
 - Use **subagents** for delegation — scout first, then plan, then implement
-- Search the web with **brave-search** when you need current docs or information
+- Search the web with **brave-search** when you need current docs or information; pair with **defuddle** to extract clean full-page content from result URLs
 
 ## Prompting Notes (Claude Opus 4.7)
 

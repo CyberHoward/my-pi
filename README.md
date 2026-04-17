@@ -15,8 +15,9 @@ Personal [pi](https://github.com/badlogic/pi-mono) dotfiles — extensions, skil
 │   └── skills/            # Superpowers (TDD, debugging, code review, planning, etc.)
 ├── general/               # General-purpose tools (useful everywhere)
 │   ├── extensions/        # subagent, memory, notifications
-│   └── skills/            # brave-search, browser-tools
+│   └── skills/            # brave-search, browser-tools, defuddle
 └── personal/              # Personal skills (non-engineering workflows)
+    └── skills/            # ticktick, obsidian-cli, obsidian-markdown, obsidian-bases, json-canvas
 ```
 
 ## Quick Start
@@ -39,6 +40,7 @@ Extensions and skills that are valuable in any context.
 | **notifications/** | Extension | System notifications with chime. Tools: `notify`, `ask_user`. Command: `/ping` |
 | **brave-search/** | Skill | Web search + page content extraction. Requires `BRAVE_API_KEY` |
 | **browser-tools/** | Skill | Browser automation via Chrome DevTools Protocol. Requires Chrome |
+| **defuddle/** | Skill | Clean article extraction from URLs. Prefer over `WebFetch` for standard web pages. Requires `defuddle` CLI (`npm i -g defuddle`) |
 
 ### `engineering/` — Software development
 
@@ -52,7 +54,17 @@ Tools for coding workflows. Only load these in engineering projects.
 
 ### `personal/` — Non-engineering workflows
 
-Add your own skills here for personal productivity, writing, knowledge management, etc.
+Skills for personal productivity, writing, and knowledge management.
+
+| Component | Type | Description |
+|-----------|------|-------------|
+| **ticktick/** | Skill | TickTick task workflows (inbox processing, weekly review, triage) |
+| **obsidian-cli/** | Skill | Interact with a running Obsidian vault via the `obsidian` CLI (notes, tasks, properties, plugin dev) |
+| **obsidian-markdown/** | Skill | Author valid Obsidian Flavored Markdown (wikilinks, embeds, callouts, properties) |
+| **obsidian-bases/** | Skill | Create/edit Obsidian `.base` files (views, filters, formulas) |
+| **json-canvas/** | Skill | Create/edit JSON Canvas `.canvas` files (nodes, edges, groups) |
+
+Obsidian skills and `defuddle` are vendored from [kepano/obsidian-skills](https://github.com/kepano/obsidian-skills) (MIT). See [`personal/skills/ATTRIBUTION.md`](personal/skills/ATTRIBUTION.md).
 
 ## Usage
 

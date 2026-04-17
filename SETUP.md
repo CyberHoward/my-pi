@@ -32,6 +32,16 @@ cd ~/.my-pi/general/skills/brave-search && npm install
 cd ~/.my-pi/general/skills/browser-tools && npm install
 ```
 
+Install global CLIs used by skills:
+
+```bash
+# defuddle — clean web page extraction (general/skills/defuddle)
+npm install -g defuddle
+
+# obsidian CLI — required by personal/skills/obsidian-cli (optional if not using Obsidian)
+npm install -g obsidian-cli
+```
+
 ## 4. Extension Dependencies
 
 Install npm dependencies for the code-ast extension:
