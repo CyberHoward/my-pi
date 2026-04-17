@@ -4,6 +4,7 @@ import { join } from "path";
 import { discoverComponents, buildGroupTree } from "./discovery.ts";
 import { loadConfig, saveConfig, toggleItem } from "./config.ts";
 import { applyToggleConfig } from "./settings-writer.ts";
+import { updateAgentsMd } from "./agents-md-writer.ts";
 import { buildSettingItems, createToggleUI } from "./ui.ts";
 import type { ToggleSettingItem } from "./ui.ts";
 
@@ -92,6 +93,7 @@ export default function toggleExtension(pi: ExtensionAPI) {
                 Object.assign(config, updatedConfig);
                 await saveConfig(updatedConfig, currentScope, cwd);
                 await applyToggleConfig(updatedConfig, allItems, currentScope, cwd);
+                await updateAgentsMd(updatedConfig, allItems, currentScope, cwd);
                 
                 changed = true;
               },

@@ -45,4 +45,11 @@ Example:
 
 The extension manages `-path` exclusion entries in `settings.json` (global or project). Your base paths are never modified — only exclusion lines are added/removed.
 
+After each toggle it also updates `AGENTS.md` so the agent knows what's actually available:
+
+- **Global scope** → `~/.pi/agent/AGENTS.md` — a managed `## Disabled Components` section is appended/updated
+- **Project scope** → `{cwd}/AGENTS.md` — a managed `## Disabled Components (Project Overrides)` section is appended/updated (file is created if it doesn't exist and there are disabled items)
+
+The section is bounded by `<!-- toggle-managed-start/end -->` comment markers so it can be safely rewritten without touching hand-authored content. When all items are re-enabled the section is removed entirely, leaving AGENTS.md clean.
+
 Changes are applied immediately via `ctx.reload()` when you close the dashboard.
