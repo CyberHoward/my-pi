@@ -4,6 +4,7 @@ import { join } from "path";
 import { discoverComponents, buildGroupTree } from "./discovery.ts";
 import { loadConfig, saveConfig, toggleItem } from "./config.ts";
 import { applyToggleConfig } from "./settings-writer.ts";
+import { assembleProjectAgentsMd } from "./assembler.ts";
 import { buildSettingItems, createToggleUI } from "./ui.ts";
 import type { ToggleSettingItem } from "./ui.ts";
 
@@ -56,6 +57,14 @@ export default function toggleExtension(pi: ExtensionAPI) {
       let changed = false;
       let running = true;
       
+      // Initial sync: materialize the current project config into AGENTS.md
+      // so opening `/toggle project` always brings the file in line with the
+      // saved config, even without any user toggles.
+      if (currentScope === "project") {
+        const initialConfig = await loadConfig("project", cwd);
+        await assembleProjectAgentsMd(initialConfig, allItems, cwd);
+      }
+
       // UI loop - rebuilds on each toggle or scope change
       while (running) {
         // Load config for current scope
@@ -92,6 +101,9 @@ export default function toggleExtension(pi: ExtensionAPI) {
                 Object.assign(config, updatedConfig);
                 await saveConfig(updatedConfig, currentScope, cwd);
                 await applyToggleConfig(updatedConfig, allItems, currentScope, cwd);
+                if (currentScope === "project") {
+                  await assembleProjectAgentsMd(updatedConfig, allItems, cwd);
+                }
                 
                 changed = true;
               },
