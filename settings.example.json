@@ -3,18 +3,12 @@
   "doubleEscapeAction": "tree",
   "theme": "dark",
   "extensions": [
-    "~/.my-pi/general/extensions",
-    "~/.my-pi/engineering/extensions",
-    "~/.my-pi/personal/extensions",
-    "~/.my-pi/pi-remote/packages/remote"
+    "~/.my-pi/general/extensions/toggle",
+    "~/.my-pi/general/extensions/memory.ts",
+    "~/.my-pi/general/extensions/notifications",
+    "~/.my-pi/general/extensions/subagent"
   ],
-  "skills": [
-    "~/.my-pi/general/skills",
-    "~/.my-pi/engineering/skills",
-    "~/.my-pi/engineering/skills/superpowers",
-    "~/.my-pi/personal/skills",
-    "~/.claude/skills"
-  ],
+  "skills": [],
   "packages": [
     "npm:pi-context"
   ]

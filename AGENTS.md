@@ -11,9 +11,48 @@
 
 Tool, extension, and subagent availability is **project-specific** and assembled from per-component `SNIPPET.md` files.
 
-- If you don't see an **Available Tools** section somewhere in your context files, the current project hasn't been configured yet (or you're not in a project). Tell the user they can run `/toggle project` in the project directory to pick which extensions, skills, and agents should be enabled there — this updates `.pi/settings.json` *and* writes a managed block into `{cwd}/AGENTS.md` with per-tool usage guidance.
-- Extensions' tools and skills' `SKILL.md` frontmatter are still auto-registered by pi even without project configuration, so you can call them — but the rich "when to prefer X over Y" guidance only lives in the assembled project AGENTS.md.
+- If you don't see an **Available Tools** section somewhere in your context files, the current project hasn't been configured yet (or you're not in a project). Tell the user they can run `/toggle` in the project directory to pick which extensions, skills, and agents should be enabled there — this updates `.pi/settings.json` *and* writes a managed block into `{cwd}/AGENTS.md` with per-tool usage guidance.
 - Do **not** hand-edit the `<!-- toggle-managed-start -->` … `<!-- toggle-managed-end -->` block in any AGENTS.md. Changes there get overwritten the next time `/toggle` runs.
+
+## Globally Available Tools
+
+These are always loaded regardless of project context:
+
+### Toggle (`/toggle`)
+
+Interactive TUI for enabling/disabling skills, extensions, and agents for the current project. Run it inside a project directory — it errors out in `$HOME`.
+
+### Subagents (`subagent`)
+
+Delegate tasks to specialized subagents with isolated context windows.
+
+**Modes:**
+- Single: `{ agent: "scout", task: "find all auth code" }`
+- Parallel: `{ tasks: [{ agent: "scout", task: "..." }, ...] }` (up to 8 tasks, 4 concurrent)
+- Chain: `{ chain: [{ agent: "scout", task: "..." }, { agent: "planner", task: "Based on: {previous}" }] }`
+
+**Workflow prompts:** `/implement`, `/scout-and-plan`, `/implement-and-review`
+
+Default agents (loaded from `~/.my-pi/engineering/agents/`): `scout`, `planner`, `reviewer`, `worker`, `remover`, `tooling-researcher`.
+
+### Notifications (`notify`, `ask_user`)
+
+System notifications with a custom chime sound. Cross-platform (macOS + Linux).
+
+- `notify` — Send a system notification with optional chime sound
+- `ask_user` — Play chime + notification + prompt user for input. **Use this when you need the user's attention.**
+- `/ping` — Test the chime sound
+
+### Persistent Memory (`memory_save`, `memory_search`, `memory_list`, `memory_remove`)
+
+Persistent memory across sessions. Memories are auto-injected into the system prompt.
+
+- `memory_save` — Save a memory (project-scoped or global). Use `source: "correction"` when learning from mistakes.
+- `memory_search` — Fuzzy search across memories
+- `memory_list` — List all memories
+- `memory_remove` — Remove a memory by ID
+
+**When the user corrects you, proactively save the lesson using `memory_save` with `source: "correction"`.**
 
 ## Prompting Notes (Claude Opus 4.7)
 

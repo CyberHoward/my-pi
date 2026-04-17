@@ -1,5 +1,5 @@
 import { DynamicBorder, getSettingsListTheme } from "@mariozechner/pi-coding-agent";
-import { Container, SettingsList, Text, matchesKey } from "@mariozechner/pi-tui";
+import { Container, SettingsList, Text } from "@mariozechner/pi-tui";
 import type { SettingItem } from "@mariozechner/pi-tui";
 import type { ComponentGroup, ComponentItem } from "./discovery.ts";
 import type { ToggleConfig } from "./config.ts";
@@ -20,10 +20,7 @@ export interface ToggleSettingItem extends SettingItem {
 
 export interface ToggleUIOptions {
   items: ToggleSettingItem[];
-  scope: "global" | "project";
-  hasProject: boolean;
   onToggle: (id: string, enabled: boolean) => void;
-  onScopeChange: (scope: "global" | "project") => void;
 }
 
 // ============================================================================
@@ -161,10 +158,10 @@ export function buildSettingItems(
 export function createToggleUI(
   tui: any,
   theme: any,
-  done: (result: { switchScope: "global" | "project" } | null | undefined) => void,
+  done: (result: null | undefined) => void,
   options: ToggleUIOptions
 ): { render: (w: number) => string[]; invalidate: () => void; handleInput: (data: string) => void } {
-  const { items, scope, hasProject, onToggle, onScopeChange } = options;
+  const { items, onToggle } = options;
 
   // Build lookup structures for in-place updates
   const itemMap = new Map<string, ToggleSettingItem>();
@@ -208,8 +205,7 @@ export function createToggleUI(
   container.addChild(new DynamicBorder((s: string) => theme.fg("accent", s)));
 
   // Title line
-  const scopeLabel = scope === "global" ? "(global)" : "(project)";
-  const titleText = `${theme.fg("accent", theme.bold("Component Toggle"))} ${theme.fg("muted", scopeLabel)}`;
+  const titleText = `${theme.fg("accent", theme.bold("Component Toggle"))} ${theme.fg("muted", "(project)")}`;
   container.addChild(new Text(titleText, 1, 0));
 
   // SettingsList
@@ -260,11 +256,7 @@ export function createToggleUI(
   container.addChild(settingsList);
 
   // Help text
-  const helpParts: string[] = ["↑↓ navigate", "enter toggle", "/ search", "esc close"];
-  if (hasProject) {
-    helpParts.push("tab scope");
-  }
-  const helpText = theme.fg("dim", helpParts.join(" • "));
+  const helpText = theme.fg("dim", ["↑↓ navigate", "enter toggle", "/ search", "esc close"].join(" • "));
   container.addChild(new Text(helpText, 1, 0));
 
   // Bottom border
@@ -278,13 +270,6 @@ export function createToggleUI(
       container.invalidate();
     },
     handleInput(data: string): void {
-      // Handle scope switching with Tab (cycles global <-> project)
-      if (hasProject && matchesKey(data, "tab")) {
-        onScopeChange(scope === "global" ? "project" : "global");
-        return;
-      }
-      
-      // Delegate everything else to SettingsList
       settingsList.handleInput?.(data);
       tui.requestRender();
     },

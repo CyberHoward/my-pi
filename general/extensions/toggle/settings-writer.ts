@@ -1,75 +1,80 @@
-import { readFile, writeFile, mkdir } from "fs/promises";
+import { readFile, writeFile, mkdir, stat } from "fs/promises";
 import { homedir } from "os";
 import { join, dirname } from "path";
 import type { ComponentItem } from "./discovery.ts";
 import type { ToggleConfig } from "./config.ts";
+import { isDisabled } from "./config.ts";
 
 /**
- * Managed entries written by this extension all live under the absolute
- * my-pi checkout dir. We tag them so we can safely rewrite them on every
- * apply without clobbering user-authored entries.
+ * Project-scoped settings-writer.
  *
- * IMPORTANT: pi-mono's package-manager does NOT expand `~/` for pattern
- * entries (entries starting with `!`, `+`, `-`, or containing `*`/`?`) —
- * only plain entries are run through the path resolver. A pattern like
- * `-~/.my-pi/foo` therefore never matches any real file path and the
- * force-exclude silently fails. We sidestep this by writing absolute paths.
+ * The toggle extension writes **include entries** into `{cwd}/.pi/settings.json`
+ * — one plain path per enabled component. "Enabled" means the component is
+ * not listed in the project's `toggle-config.json`.
  *
- * Resource-type semantics differ in pi-mono:
- *   skills      — auto-discovery collects SKILL.md files. `-<abs-dir>`
- *                 force-exclude matches via the SKILL.md parent-dir fallback
- *                 in matchesAnyExactPattern.
- *   extensions  — auto-discovery collects index.ts/index.js/file.ts paths.
- *                 There is no parent-dir fallback for non-SKILL files, so a
- *                 bare `-<abs-dir>` pattern never matches. We therefore emit
- *                 glob excludes that cover both `dir/index.ts` and direct
- *                 `dir.ts` extension layouts:
- *                   !<abs>/**     (subdir extensions with index.ts)
- *                   !<abs>.ts     (single-file .ts extensions)
- *                   !<abs>.js     (single-file .js extensions)
- *   agents      — pi-mono itself ignores `settings.agents`. Our subagent
- *                 extension reads that array and has been extended to honor
- *                 `-<abs-path>` entries as agent-level exclusions.
+ * Global `~/.pi/agent/settings.json` is never touched by this extension;
+ * always-on tools (toggle, memory, notifications, subagent, agents) live
+ * there and are hand-maintained.
  *
- * Legacy `-~/.my-pi/...` and `!~/.my-pi/...` tokens (from earlier versions
- * of this writer) are still recognized on read so stale entries get rewritten
- * to the absolute-path form on the next apply.
+ * Managed vs user-authored entries
+ * --------------------------------
+ * Any entry whose path (after stripping a leading `-`, `!`, or `+` prefix)
+ * points into `~/.my-pi/` is considered managed and rewritten on every
+ * apply. This also sweeps up legacy exclusion-style entries (`-path` /
+ * `!path/**`) from earlier versions of this writer.
+ *
+ * Entries outside `~/.my-pi/` (user-authored includes/excludes of their own)
+ * are preserved verbatim.
  */
-const MY_PI_DIR = join(homedir(), ".my-pi");
-const LEGACY_MANAGED_PREFIXES = ["-~/.my-pi/", "!~/.my-pi/"];
-const MANAGED_ABS_ROOTS = [`-${MY_PI_DIR}/`, `!${MY_PI_DIR}/`];
 
+const MY_PI_DIR = join(homedir(), ".my-pi");
+const HOME_MARKER = "~/.my-pi/";
+const ABS_MARKER = MY_PI_DIR + "/";
+
+/** Stripped-prefix check for managed-ness. */
 function isManagedEntry(entry: string): boolean {
+  const stripped = entry.replace(/^[-!+]\s*/, "").trim();
   return (
-    LEGACY_MANAGED_PREFIXES.some((p) => entry.startsWith(p)) ||
-    MANAGED_ABS_ROOTS.some((p) => entry.startsWith(p))
+    stripped === "~/.my-pi" ||
+    stripped === MY_PI_DIR ||
+    stripped.startsWith(HOME_MARKER) ||
+    stripped.startsWith(ABS_MARKER)
   );
 }
 
-function getSettingsPath(scope: "global" | "project", cwd?: string): string {
-  if (scope === "global") return join(homedir(), ".pi", "agent", "settings.json");
-  return join(cwd!, ".pi", "settings.json");
-}
-
-function exclusionsFor(item: ComponentItem): string[] {
-  const abs = `${MY_PI_DIR}/${item.relativePath}`;
-  switch (item.type) {
-    case "skill":
-      // `-<dir>` with exact force-exclude matches via SKILL.md parent-dir fallback.
-      return [`-${abs}`];
-    case "extension":
-      // Cover both layouts: <dir>/index.{ts,js} and <dir>.{ts,js}.
-      return [`!${abs}/**`, `!${abs}.ts`, `!${abs}.js`];
-    case "agent":
-      // Honored by our subagent extension (pi-mono ignores settings.agents).
-      return [`-${abs}`];
+async function fileExists(path: string): Promise<boolean> {
+  try {
+    await stat(path);
+    return true;
+  } catch {
+    return false;
   }
 }
 
 /**
- * Apply toggle config to settings.json by adding/removing exclusion entries.
- * Only touches entries in our managed namespace — user-authored entries are
- * preserved verbatim.
+ * Compute the include entry for a component.
+ *
+ * - Skill (directory)         → `~/.my-pi/<relPath>`
+ * - Extension (directory)     → `~/.my-pi/<relPath>` (has `index.ts` inside)
+ * - Extension (single .ts)    → `~/.my-pi/<relPath>.ts`
+ * - Agent                     → `~/.my-pi/<relPath>.md`
+ */
+async function includeEntryFor(item: ComponentItem): Promise<string> {
+  const rel = `~/.my-pi/${item.relativePath}`;
+  const abs = join(MY_PI_DIR, item.relativePath);
+
+  if (item.type === "extension") {
+    if (await fileExists(abs + ".ts")) return `${rel}.ts`;
+    return rel;
+  }
+  if (item.type === "agent") return `${rel}.md`;
+  return rel; // skill
+}
+
+/**
+ * Rewrite the project `settings.json` to include exactly the enabled
+ * components. User-authored entries are preserved; managed entries are
+ * replaced wholesale.
  */
 export async function applyToggleConfig(
   config: ToggleConfig,
@@ -77,47 +82,52 @@ export async function applyToggleConfig(
   scope: "global" | "project",
   cwd?: string,
 ): Promise<void> {
-  const settingsPath = getSettingsPath(scope, cwd);
-  let settings: Record<string, any>;
+  if (scope !== "project" || !cwd) {
+    // Global scope is a no-op in the new model — always-on tools live in
+    // the hand-maintained global settings.json.
+    return;
+  }
+
+  const settingsPath = join(cwd, ".pi", "settings.json");
+
+  let settings: Record<string, unknown>;
   try {
     settings = JSON.parse(await readFile(settingsPath, "utf-8"));
   } catch {
     settings = {};
   }
 
-  // Find all items that are disabled (either directly or via group path)
-  const disabledItems = allItems.filter((item) =>
-    config.disabled.some((d) => item.relativePath === d || item.relativePath.startsWith(d + "/")),
-  );
+  // Enabled = not disabled (by path or ancestor path) in toggle-config.json.
+  const enabled = allItems.filter((i) => !isDisabled(config, i.relativePath));
 
-  const keyMap: Record<string, string> = {
+  const includes: Record<"skills" | "extensions" | "agents", string[]> = {
+    skills: [],
+    extensions: [],
+    agents: [],
+  };
+  const keyMap: Record<ComponentItem["type"], "skills" | "extensions" | "agents"> = {
     skill: "skills",
     extension: "extensions",
     agent: "agents",
   };
 
-  const exclusions: Record<string, Set<string>> = {
-    skills: new Set(),
-    extensions: new Set(),
-    agents: new Set(),
-  };
-
-  for (const item of disabledItems) {
+  for (const item of enabled) {
     const key = keyMap[item.type];
-    for (const entry of exclusionsFor(item)) {
-      exclusions[key].add(entry);
-    }
+    includes[key].push(await includeEntryFor(item));
   }
 
-  // Update each array: strip old managed exclusions, then append the freshly
-  // computed set sorted for stable diffs.
-  for (const key of ["skills", "extensions", "agents"]) {
-    if (!settings[key] && exclusions[key].size === 0) continue;
-    if (!settings[key]) settings[key] = [];
+  for (const key of ["skills", "extensions", "agents"] as const) {
+    const existing = Array.isArray(settings[key]) ? (settings[key] as unknown[]) : [];
+    const userAuthored = existing
+      .filter((e): e is string => typeof e === "string")
+      .filter((e) => !isManagedEntry(e));
+    const managed = includes[key].sort();
 
-    const base = (settings[key] as string[]).filter((e: string) => !isManagedEntry(e));
-    const sorted = [...exclusions[key]].sort();
-    settings[key] = [...base, ...sorted];
+    if (userAuthored.length === 0 && managed.length === 0) {
+      delete settings[key];
+    } else {
+      settings[key] = [...userAuthored, ...managed];
+    }
   }
 
   await mkdir(dirname(settingsPath), { recursive: true });

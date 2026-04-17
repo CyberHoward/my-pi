@@ -69,22 +69,20 @@ Obsidian skills and `defuddle` are vendored from [kepano/obsidian-skills](https:
 
 ## Usage
 
-### Global setup (loads everywhere)
+### Global setup (minimal always-on toolkit)
 
-Merge into `~/.pi/agent/settings.json`:
+Global `~/.pi/agent/settings.json` only enables the tools you want everywhere — everything else is opt-in per project. A sensible minimum:
 
 ```json
 {
   "extensions": [
-    "~/.my-pi/general/extensions",
-    "~/.my-pi/engineering/extensions"
+    "~/.my-pi/general/extensions/toggle",
+    "~/.my-pi/general/extensions/memory.ts",
+    "~/.my-pi/general/extensions/notifications",
+    "~/.my-pi/general/extensions/subagent"
   ],
-  "skills": [
-    "~/.my-pi/general/skills",
-    "~/.my-pi/engineering/skills",
-    "~/.my-pi/engineering/skills/superpowers",
-    "~/.my-pi/personal"
-  ]
+  "skills": [],
+  "packages": ["npm:pi-context"]
 }
 ```
 
@@ -95,36 +93,9 @@ ln -sf  ~/.my-pi/AGENTS.md           ~/.pi/agent/AGENTS.md
 ln -sfn ~/.my-pi/engineering/agents  ~/.pi/agent/agents
 ```
 
-### Per-project setup (selective loading)
+### Per-project setup
 
-Create `.pi/settings.json` in a project root. For an **engineering** project:
-
-```json
-{
-  "extensions": [
-    "~/.my-pi/general/extensions",
-    "~/.my-pi/engineering/extensions"
-  ],
-  "skills": [
-    "~/.my-pi/general/skills",
-    "~/.my-pi/engineering/skills/superpowers"
-  ]
-}
-```
-
-For a **non-engineering** project (writing, personal):
-
-```json
-{
-  "extensions": [
-    "~/.my-pi/general/extensions"
-  ],
-  "skills": [
-    "~/.my-pi/general/skills",
-    "~/.my-pi/personal"
-  ]
-}
-```
+Run `/toggle` inside the project directory. The dashboard picks which skills, extensions, and agents to enable for that project — it writes `.pi/settings.json` (one include per enabled component), `.pi/toggle-config.json` (the disabled list), and an assembled `AGENTS.md` with per-tool docs.
 
 ## Environment Variables
 

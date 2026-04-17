@@ -1,6 +1,6 @@
 import type { ExtensionAPI } from "@mariozechner/pi-coding-agent";
-import { stat } from "fs/promises";
-import { join } from "path";
+import { homedir } from "os";
+import { resolve } from "path";
 import { discoverComponents, buildGroupTree } from "./discovery.ts";
 import { loadConfig, saveConfig, toggleItem } from "./config.ts";
 import { applyToggleConfig } from "./settings-writer.ts";
@@ -9,126 +9,87 @@ import { buildSettingItems, createToggleUI } from "./ui.ts";
 import type { ToggleSettingItem } from "./ui.ts";
 
 // ============================================================================
-// Helpers
-// ============================================================================
-
-async function hasProjectDir(cwd: string): Promise<boolean> {
-  try {
-    const piDir = join(cwd, ".pi");
-    const s = await stat(piDir);
-    return s.isDirectory();
-  } catch {
-    return false;
-  }
-}
-
-// ============================================================================
 // Extension
 // ============================================================================
 
 export default function toggleExtension(pi: ExtensionAPI) {
   pi.registerCommand("toggle", {
-    description: "Toggle skills, extensions, and agents on/off",
-    getArgumentCompletions: (prefix: string) => {
-      const items = [
-        { value: "project", label: "project", description: "Edit project-level toggles" },
-      ];
-      const filtered = items.filter(i => i.value.startsWith(prefix));
-      return filtered.length > 0 ? filtered : null;
-    },
-    handler: async (args, ctx) => {
+    description: "Toggle which ~/.my-pi components are enabled for this project",
+    handler: async (_args, ctx) => {
       const cwd = ctx.cwd;
-      const hasProject = await hasProjectDir(cwd);
-      
-      // Parse args to determine initial scope
-      let currentScope: "global" | "project" = args?.trim() === "project" && hasProject 
-        ? "project" 
-        : "global";
-      
-      // Discover all components once
+      const home = homedir();
+
+      // Reject use in the home directory — /toggle is a project-scoping tool
+      // and would have no meaningful effect at $HOME (no project settings to
+      // write, and we don't want to litter $HOME with an AGENTS.md block).
+      if (resolve(cwd) === resolve(home)) {
+        ctx.ui.notify(
+          "/toggle must be run inside a project directory — cd into a project first.",
+          "error",
+        );
+        return;
+      }
+
       const allItems = await discoverComponents();
       const groups = buildGroupTree(allItems);
-      
+
       if (allItems.length === 0) {
         ctx.ui.notify("No components found in ~/.my-pi", "warning");
         return;
       }
-      
-      let changed = false;
-      let running = true;
-      
-      // Initial sync: materialize the current project config into AGENTS.md
-      // so opening `/toggle project` always brings the file in line with the
-      // saved config, even without any user toggles.
-      if (currentScope === "project") {
+
+      // Initial sync: materialize the current project config into settings.json
+      // and AGENTS.md so opening `/toggle` always brings these files in line
+      // with the saved toggle-config.json, even without any user toggles.
+      {
         const initialConfig = await loadConfig("project", cwd);
+        await applyToggleConfig(initialConfig, allItems, "project", cwd);
         await assembleProjectAgentsMd(initialConfig, allItems, cwd);
       }
 
-      // UI loop - rebuilds on each toggle or scope change
+      let changed = false;
+      let running = true;
+
       while (running) {
-        // Load config for current scope
-        const config = await loadConfig(currentScope, cwd);
-        
-        // Build setting items
+        const config = await loadConfig("project", cwd);
         const items = buildSettingItems(groups, allItems, config);
-        
-        // Show UI
-        const result = await ctx.ui.custom<{ switchScope: "global" | "project" } | null | undefined>(
+
+        const result = await ctx.ui.custom<null | undefined>(
           (tui, theme, _kb, done) => {
             return createToggleUI(tui, theme, done, {
               items,
-              scope: currentScope,
-              hasProject,
               onToggle: async (id, enabled) => {
-                // Find the item
-                const item = items.find(i => i.id === id) as ToggleSettingItem | undefined;
+                const item = items.find((i) => i.id === id) as ToggleSettingItem | undefined;
                 if (!item) return;
-                
+
                 let updatedConfig = config;
-                
+
                 if (item.childIds && item.childIds.length > 0) {
                   // Group toggle: apply to all children
                   for (const childId of item.childIds) {
                     updatedConfig = toggleItem(updatedConfig, childId, enabled);
                   }
                 } else {
-                  // Single item toggle
                   updatedConfig = toggleItem(updatedConfig, id, enabled);
                 }
-                
-                // Save & apply config (mutate in place for next toggle)
+
                 Object.assign(config, updatedConfig);
-                await saveConfig(updatedConfig, currentScope, cwd);
-                await applyToggleConfig(updatedConfig, allItems, currentScope, cwd);
-                if (currentScope === "project") {
-                  await assembleProjectAgentsMd(updatedConfig, allItems, cwd);
-                }
-                
+                await saveConfig(updatedConfig, "project", cwd);
+                await applyToggleConfig(updatedConfig, allItems, "project", cwd);
+                await assembleProjectAgentsMd(updatedConfig, allItems, cwd);
+
                 changed = true;
               },
-              onScopeChange: (newScope) => {
-                done({ switchScope: newScope });
-              },
             });
-          }
+          },
         );
-        
-        if (result === undefined) {
-          // User pressed escape - exit loop
-          running = false;
-        } else if (result && "switchScope" in result) {
-          // Scope change requested
-          currentScope = result.switchScope;
-          // Loop continues with new scope
-        }
-        // If result is null (toggle happened), loop continues to refresh UI
+
+        // Escape closes the UI; any other resolution re-runs with fresh state.
+        if (result === undefined) running = false;
       }
-      
-      // Reload if anything changed
+
       if (changed) {
         await ctx.reload();
-        return;
       }
     },
   });
