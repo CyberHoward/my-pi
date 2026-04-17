@@ -88,12 +88,11 @@ Merge into `~/.pi/agent/settings.json`:
 }
 ```
 
-Then copy agents and global prompt:
+Then symlink the global prompt and agents directory so the repo stays the single source of truth:
 
 ```bash
-cp ~/.my-pi/AGENTS.md ~/.pi/agent/AGENTS.md
-mkdir -p ~/.pi/agent/agents
-cp ~/.my-pi/engineering/agents/*.md ~/.pi/agent/agents/
+ln -sf  ~/.my-pi/AGENTS.md           ~/.pi/agent/AGENTS.md
+ln -sfn ~/.my-pi/engineering/agents  ~/.pi/agent/agents
 ```
 
 ### Per-project setup (selective loading)

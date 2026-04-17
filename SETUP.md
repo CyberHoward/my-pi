@@ -4,23 +4,24 @@ Follow these steps to set up pi with this configuration.
 
 ## 1. Settings
 
-Copy settings and global prompt:
+Copy settings once, then symlink the global prompt so edits in the repo flow through automatically:
 
 ```bash
 mkdir -p ~/.pi/agent
-cp ~/.my-pi/settings.example.json ~/.pi/agent/settings.json
-cp ~/.my-pi/AGENTS.md ~/.pi/agent/AGENTS.md
+cp ~/.my-pi/settings.example.json ~/.pi/agent/settings.json   # real copy — edit to taste
+ln -sf ~/.my-pi/AGENTS.md ~/.pi/agent/AGENTS.md               # symlink — no drift
 ```
 
 If `~/.pi/agent/settings.json` already exists, merge in the `extensions` and `skills` arrays rather than overwriting.
 
 ## 2. Agents
 
-Copy subagent definitions:
+Symlink the whole agents directory so adding a new agent to the repo makes it immediately available to pi:
 
 ```bash
-mkdir -p ~/.pi/agent/agents
-cp ~/.my-pi/engineering/agents/*.md ~/.pi/agent/agents/
+# Back up any existing copy first if you have one:
+[ -d ~/.pi/agent/agents ] && [ ! -L ~/.pi/agent/agents ] && mv ~/.pi/agent/agents ~/.pi/agent/agents.bak
+ln -sfn ~/.my-pi/engineering/agents ~/.pi/agent/agents
 ```
 
 ## 3. Skills
