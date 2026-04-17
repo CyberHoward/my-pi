@@ -5,6 +5,10 @@ import type { ComponentGroup, ComponentItem } from "./discovery.ts";
 import type { ToggleConfig } from "./config.ts";
 import { isDisabled } from "./config.ts";
 
+// Value display constants
+export const ENABLED_VALUE = "✓";
+export const DISABLED_VALUE = "✗";
+
 // ============================================================================
 // Types
 // ============================================================================
@@ -18,7 +22,7 @@ export interface ToggleUIOptions {
   items: ToggleSettingItem[];
   scope: "global" | "project";
   hasProject: boolean;
-  onToggle: (id: string, newValue: string) => void;
+  onToggle: (id: string, enabled: boolean) => void;
   onScopeChange: (scope: "global" | "project") => void;
 }
 
@@ -107,8 +111,8 @@ export function buildSettingItems(
       result.push({
         id: item.relativePath,
         label: `${indent}${item.name}`,
-        currentValue: disabled ? "disabled" : "enabled",
-        values: ["enabled", "disabled"],
+        currentValue: disabled ? DISABLED_VALUE : ENABLED_VALUE,
+        values: [ENABLED_VALUE, DISABLED_VALUE],
         description,
       });
     } else {
@@ -126,8 +130,8 @@ export function buildSettingItems(
       result.push({
         id: group.id,
         label: `${indent}▸ ${capitalize(group.label)}`,
-        currentValue: groupResult.value,
-        values: ["enabled", "disabled"],
+        currentValue: groupResult.value === "enabled" ? ENABLED_VALUE : DISABLED_VALUE,
+        values: [ENABLED_VALUE, DISABLED_VALUE],
         description,
         childIds,
       });
@@ -162,6 +166,42 @@ export function createToggleUI(
 ): { render: (w: number) => string[]; invalidate: () => void; handleInput: (data: string) => void } {
   const { items, scope, hasProject, onToggle, onScopeChange } = options;
 
+  // Build lookup structures for in-place updates
+  const itemMap = new Map<string, ToggleSettingItem>();
+  const childToGroups = new Map<string, ToggleSettingItem[]>();
+  for (const item of items) {
+    itemMap.set(item.id, item);
+  }
+  for (const item of items) {
+    if (item.childIds) {
+      for (const childId of item.childIds) {
+        const groups = childToGroups.get(childId) || [];
+        groups.push(item);
+        childToGroups.set(childId, groups);
+      }
+    }
+  }
+
+  function recalcGroup(groupItem: ToggleSettingItem): void {
+    if (!groupItem.childIds) return;
+    let enabledCount = 0;
+    for (const childId of groupItem.childIds) {
+      const child = itemMap.get(childId);
+      if (child && child.currentValue === ENABLED_VALUE) enabledCount++;
+    }
+    const total = groupItem.childIds.length;
+    if (enabledCount === total) {
+      groupItem.currentValue = ENABLED_VALUE;
+      groupItem.description = undefined;
+    } else if (enabledCount === 0) {
+      groupItem.currentValue = DISABLED_VALUE;
+      groupItem.description = undefined;
+    } else {
+      groupItem.currentValue = ENABLED_VALUE;
+      groupItem.description = `${enabledCount}/${total} enabled`;
+    }
+  }
+
   const container = new Container();
 
   // Top border
@@ -178,7 +218,38 @@ export function createToggleUI(
     Math.min(items.length + 2, 20),
     getSettingsListTheme(),
     (id, newValue) => {
-      onToggle(id, newValue);
+      const item = itemMap.get(id);
+      if (!item) return;
+      const enabled = newValue === ENABLED_VALUE;
+
+      if (item.childIds && item.childIds.length > 0) {
+        // Group toggle: update all children to match
+        for (const childId of item.childIds) {
+          settingsList.updateValue(childId, newValue);
+        }
+        // Clear group description (no longer partial)
+        item.description = undefined;
+        // Update any ancestor groups that contain these children
+        const visited = new Set<string>([id]);
+        for (const childId of item.childIds) {
+          const parentGroups = childToGroups.get(childId) || [];
+          for (const pg of parentGroups) {
+            if (!visited.has(pg.id)) {
+              visited.add(pg.id);
+              recalcGroup(pg);
+            }
+          }
+        }
+      } else {
+        // Single item toggle: update parent groups
+        const parentGroups = childToGroups.get(id) || [];
+        for (const pg of parentGroups) {
+          recalcGroup(pg);
+        }
+      }
+
+      onToggle(id, enabled);
+      tui.requestRender();
     },
     () => {
       // On escape/close

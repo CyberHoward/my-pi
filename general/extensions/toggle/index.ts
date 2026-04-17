@@ -71,12 +71,11 @@ export default function toggleExtension(pi: ExtensionAPI) {
               items,
               scope: currentScope,
               hasProject,
-              onToggle: async (id, newValue) => {
+              onToggle: async (id, enabled) => {
                 // Find the item
                 const item = items.find(i => i.id === id) as ToggleSettingItem | undefined;
                 if (!item) return;
                 
-                const enabled = newValue === "enabled";
                 let updatedConfig = config;
                 
                 if (item.childIds && item.childIds.length > 0) {
@@ -89,16 +88,12 @@ export default function toggleExtension(pi: ExtensionAPI) {
                   updatedConfig = toggleItem(updatedConfig, id, enabled);
                 }
                 
-                // Save config
+                // Save & apply config (mutate in place for next toggle)
+                Object.assign(config, updatedConfig);
                 await saveConfig(updatedConfig, currentScope, cwd);
-                
-                // Apply to settings.json
                 await applyToggleConfig(updatedConfig, allItems, currentScope, cwd);
                 
                 changed = true;
-                
-                // Close UI so loop rebuilds with fresh state
-                done(null);
               },
               onScopeChange: (newScope) => {
                 done({ switchScope: newScope });

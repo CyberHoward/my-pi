@@ -95,29 +95,74 @@ function findNearestProjectAgentsDir(cwd: string): string | null {
 	}
 }
 
+interface AgentSettingsEntries {
+	/** Directory paths that contribute agents (plain entries). */
+	includeDirs: string[];
+	/**
+	 * Exclusion targets. An excluded entry may be:
+	 *  - an absolute file path (e.g. `.../agents/foo.md`),
+	 *  - an absolute path without extension (e.g. `.../agents/foo`), or
+	 *  - an absolute directory (excludes every agent under it).
+	 * All three forms are supported to match the toggle extension's output and
+	 * hand-written entries.
+	 */
+	excludes: string[];
+}
+
+function expandSettingsPath(raw: string, baseDir: string): string {
+	const expanded = raw.startsWith("~") ? path.join(os.homedir(), raw.slice(1)) : raw;
+	return path.isAbsolute(expanded) ? expanded : path.resolve(baseDir, expanded);
+}
+
 /**
- * Read an `agents` array from a settings.json file and resolve paths relative to its directory.
- * Returns resolved directory paths.
+ * Read an `agents` array from a settings.json file and return both the
+ * include directories (plain entries) and exclusion targets (entries
+ * starting with `-` or `!`). Paths are resolved relative to the settings
+ * file's directory and `~/` is expanded.
  */
-function loadAgentPathsFromSettings(settingsPath: string): string[] {
+function loadAgentPathsFromSettings(settingsPath: string): AgentSettingsEntries {
 	try {
 		const raw = fs.readFileSync(settingsPath, "utf-8");
 		const settings = JSON.parse(raw);
 		const agentPaths: unknown[] = settings.agents;
-		if (!Array.isArray(agentPaths)) return [];
+		if (!Array.isArray(agentPaths)) return { includeDirs: [], excludes: [] };
 
 		const baseDir = path.dirname(settingsPath);
-		const resolved: string[] = [];
+		const includeDirs: string[] = [];
+		const excludes: string[] = [];
 		for (const p of agentPaths) {
 			if (typeof p !== "string") continue;
-			const expanded = p.startsWith("~") ? path.join(os.homedir(), p.slice(1)) : p;
-			const abs = path.isAbsolute(expanded) ? expanded : path.resolve(baseDir, expanded);
-			resolved.push(abs);
+			const trimmed = p.trim();
+			if (!trimmed) continue;
+			if (trimmed.startsWith("-") || trimmed.startsWith("!")) {
+				excludes.push(expandSettingsPath(trimmed.slice(1), baseDir));
+			} else if (trimmed.startsWith("+")) {
+				// `+` force-include is treated as a plain include at the agent layer.
+				includeDirs.push(expandSettingsPath(trimmed.slice(1), baseDir));
+			} else {
+				includeDirs.push(expandSettingsPath(trimmed, baseDir));
+			}
 		}
-		return resolved;
+		return { includeDirs, excludes };
 	} catch {
-		return [];
+		return { includeDirs: [], excludes: [] };
 	}
+}
+
+function isAgentExcluded(agent: AgentConfig, excludes: string[]): boolean {
+	if (excludes.length === 0) return false;
+	const filePath = agent.filePath;
+	const withoutExt = filePath.endsWith(".md") ? filePath.slice(0, -3) : filePath;
+	const parentDir = path.dirname(filePath);
+	for (const target of excludes) {
+		if (target === filePath) return true;
+		if (target === withoutExt) return true;
+		// Directory-form exclusion: anything under (or equal to) target.
+		if (target === parentDir) return true;
+		const prefix = target.endsWith(path.sep) ? target : target + path.sep;
+		if (filePath.startsWith(prefix)) return true;
+	}
+	return false;
 }
 
 export function discoverAgents(cwd: string, scope: AgentScope): AgentDiscoveryResult {
@@ -133,8 +178,13 @@ export function discoverAgents(cwd: string, scope: AgentScope): AgentDiscoveryRe
 	const settingsUserAgents: AgentConfig[] = [];
 	const settingsProjectAgents: AgentConfig[] = [];
 
+	const userExcludes: string[] = [];
+	const projectExcludes: string[] = [];
+
 	if (scope !== "project") {
-		for (const dir of loadAgentPathsFromSettings(globalSettingsPath)) {
+		const { includeDirs, excludes } = loadAgentPathsFromSettings(globalSettingsPath);
+		userExcludes.push(...excludes);
+		for (const dir of includeDirs) {
 			settingsUserAgents.push(...loadAgentsFromDir(dir, "user"));
 		}
 	}
@@ -145,7 +195,9 @@ export function discoverAgents(cwd: string, scope: AgentScope): AgentDiscoveryRe
 		while (true) {
 			const candidate = path.join(dir, ".pi", "settings.json");
 			if (fs.existsSync(candidate)) {
-				for (const agentDir of loadAgentPathsFromSettings(candidate)) {
+				const { includeDirs, excludes } = loadAgentPathsFromSettings(candidate);
+				projectExcludes.push(...excludes);
+				for (const agentDir of includeDirs) {
 					settingsProjectAgents.push(...loadAgentsFromDir(agentDir, "project"));
 				}
 				break;
@@ -153,6 +205,18 @@ export function discoverAgents(cwd: string, scope: AgentScope): AgentDiscoveryRe
 			const parent = path.dirname(dir);
 			if (parent === dir) break;
 			dir = parent;
+		}
+	}
+
+	// Apply exclusions to all loaded agents (both default-dir and settings-dir).
+	const allExcludes = [...userExcludes, ...projectExcludes];
+	if (allExcludes.length > 0) {
+		const filter = (list: AgentConfig[]) => list.filter((a) => !isAgentExcluded(a, allExcludes));
+		for (const bucket of [userAgents, settingsUserAgents, projectAgents, settingsProjectAgents]) {
+			// Mutate in place
+			const filtered = filter(bucket);
+			bucket.length = 0;
+			bucket.push(...filtered);
 		}
 	}
 
